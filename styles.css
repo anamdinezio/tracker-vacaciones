@@ -181,3 +181,40 @@ form > .aclaracion:last-child {
 .error:empty {
   display: none;
 }
+
+/* Resumen: tres números grandes uno al lado del otro. */
+.indicadores {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 12px;
+}
+
+.indicador {
+  display: flex;
+  flex-direction: column;
+  padding: 14px 16px;
+  border: 1px solid var(--borde);
+  border-radius: 8px;
+  font-size: 0.9rem;
+  color: var(--texto-suave);
+}
+
+.indicador-numero {
+  font-size: 2rem;
+  font-weight: 600;
+  line-height: 1.2;
+  color: var(--texto);
+}
+
+.indicador-destacado {
+  border-color: var(--acento);
+  background: #eef5f3;
+}
+
+.indicador-destacado .indicador-numero {
+  color: var(--acento);
+}
+
+.indicadores + .aclaracion {
+  margin: 12px 0 0;
+}

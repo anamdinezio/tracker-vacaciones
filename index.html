@@ -17,6 +17,25 @@
     <p class="aclaracion" data-i18n="notaPrivacidad"></p>
 
     <section class="tarjeta">
+      <h2 id="titulo-resumen"></h2>
+      <div class="indicadores">
+        <div class="indicador">
+          <span class="indicador-numero" id="total-dias"></span>
+          <span data-i18n="totalDias"></span>
+        </div>
+        <div class="indicador">
+          <span class="indicador-numero" id="dias-usados"></span>
+          <span data-i18n="diasUsados"></span>
+        </div>
+        <div class="indicador indicador-destacado">
+          <span class="indicador-numero" id="dias-disponibles"></span>
+          <span data-i18n="diasDisponibles"></span>
+        </div>
+      </div>
+      <p class="aclaracion" data-i18n="notaSinPeriodos"></p>
+    </section>
+
+    <section class="tarjeta">
       <h2 data-i18n="datosEmpleado"></h2>
 
       <form id="form-empleado">
@@ -75,7 +94,7 @@
         </fieldset>
 
         <p id="mensaje-error" class="error"></p>
-        <p class="aclaracion" data-i18n="notaGuardado"></p>
+        <p class="aclaracion" id="estado-guardado"></p>
       </form>
     </section>
   </main>

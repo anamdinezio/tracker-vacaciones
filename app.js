@@ -27,6 +27,8 @@ function aplicarIdioma() {
 
   document.getElementById("boton-idioma").textContent = textos.cambiarIdioma;
   mostrarError();
+  mostrarEstadoGuardado();
+  mostrarResumen();
 }
 
 function cambiarIdioma() {
@@ -149,6 +151,39 @@ function alCambiarFormulario() {
 
   datos.empleado = empleado;
   guardarDatos();
+
+  horaGuardado = new Date().toLocaleTimeString(idioma, { hour: "2-digit", minute: "2-digit" });
+  mostrarEstadoGuardado();
+  mostrarResumen();
+}
+
+// Hora del último guardado. Vacía hasta que el usuario cambia algo.
+let horaGuardado = "";
+
+function mostrarEstadoGuardado() {
+  const textos = TEXTOS[idioma];
+  const estado = document.getElementById("estado-guardado");
+  estado.textContent = horaGuardado
+    ? textos.guardadoA.replace("{hora}", horaGuardado)
+    : textos.notaGuardado;
+}
+
+// ---------- Resumen ----------
+
+function mostrarResumen() {
+  const textos = TEXTOS[idioma];
+  const empleado = datos.empleado;
+
+  // Number("") da 0, así que los campos vacíos cuentan como cero.
+  const totalDias = Number(empleado.diasVacaciones) + Number(empleado.diasArrastrados);
+  const diasUsados = 0; // se calcula en el paso de períodos de vacaciones
+
+  document.getElementById("titulo-resumen").textContent = empleado.nombre
+    ? textos.resumenDe.replace("{nombre}", empleado.nombre)
+    : textos.resumen;
+  document.getElementById("total-dias").textContent = totalDias;
+  document.getElementById("dias-usados").textContent = diasUsados;
+  document.getElementById("dias-disponibles").textContent = totalDias - diasUsados;
 }
 
 // ---------- Arranque ----------
