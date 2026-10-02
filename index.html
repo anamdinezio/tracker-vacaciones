@@ -36,6 +36,22 @@
         </div>
       </div>
       <p class="aclaracion" id="nota-sin-periodos" data-i18n="notaSinPeriodos"></p>
+
+      <div id="bloque-dias-por-mes">
+        <h3 data-i18n="diasPorMes"></h3>
+        <div id="dias-por-mes" class="grafico-meses"></div>
+      </div>
+    </section>
+
+    <section class="tarjeta">
+      <h2 id="titulo-calendario"></h2>
+      <div class="leyenda">
+        <span><i class="muestra dia-vacaciones"></i> <span data-i18n="leyendaVacaciones"></span></span>
+        <span><i class="muestra dia-festivo"></i> <span data-i18n="leyendaFestivo"></span></span>
+        <span><i class="muestra dia-no-laborable"></i> <span data-i18n="leyendaNoLaborable"></span></span>
+        <span><i class="muestra dia-fuera"></i> <span data-i18n="leyendaFuera"></span></span>
+      </div>
+      <div id="calendario" class="calendario"></div>
     </section>
 
     <section class="tarjeta">
@@ -148,6 +164,7 @@
   </footer>
 
   <script src="i18n.js"></script>
+  <script src="calendario.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

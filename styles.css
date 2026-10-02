@@ -339,3 +339,150 @@ form > .aclaracion:last-child {
 .fila-agregar + .error + .aclaracion {
   margin-top: 0;
 }
+
+/* Aviso dentro de una fila de la lista. */
+.lista-aviso {
+  font-size: 0.85rem;
+  color: #c4620a;
+}
+
+/* Gráfico de días por mes. */
+#bloque-dias-por-mes h3 {
+  margin: 24px 0 8px;
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+#bloque-dias-por-mes[hidden] {
+  display: none;
+}
+
+.grafico-meses {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 6px;
+}
+
+.columna-mes {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.columna-area {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: center;
+  width: 100%;
+  height: 100px;
+}
+
+.columna-barra {
+  width: 100%;
+  max-width: 32px;
+  border-radius: 4px 4px 0 0;
+  background: var(--acento);
+}
+
+.columna-numero {
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.columna-etiqueta {
+  font-size: 0.75rem;
+  color: var(--texto-suave);
+}
+
+/* Colores de los días: se usan en el calendario y en la leyenda. */
+.dia-vacaciones {
+  background: var(--acento);
+  color: var(--superficie);
+}
+
+.dia-festivo {
+  background: #fde7c2;
+  color: #8a5300;
+}
+
+.dia-no-laborable {
+  background: #ececea;
+  color: #8a9099;
+}
+
+.dia-fuera {
+  color: #c9ccd1;
+}
+
+.leyenda {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 20px;
+  margin-bottom: 16px;
+  font-size: 0.85rem;
+  color: var(--texto-suave);
+}
+
+.leyenda > span {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.muestra {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border-radius: 3px;
+}
+
+.muestra.dia-fuera {
+  border: 1px dashed #c9ccd1;
+}
+
+/* Calendario anual: los meses se acomodan solos según el ancho. */
+.calendario {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 20px;
+}
+
+.mes-titulo {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 6px;
+  font-weight: 600;
+}
+
+.mes-cantidad {
+  font-size: 0.8rem;
+  font-weight: normal;
+  color: var(--acento);
+}
+
+.mes-grilla {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+  text-align: center;
+  font-size: 0.8rem;
+}
+
+.dia-semana {
+  padding-bottom: 2px;
+  font-size: 0.7rem;
+  color: var(--texto-aclaracion);
+}
+
+.dia {
+  padding: 3px 0;
+  border-radius: 4px;
+}
+
+.dia-hoy {
+  outline: 2px solid var(--texto);
+  outline-offset: -2px;
+  font-weight: 600;
+}

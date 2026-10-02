@@ -127,15 +127,10 @@ function leerEmpleado() {
 // Devuelve la clave del texto de error, o "" si está todo bien.
 // Las fechas vienen como "aaaa-mm-dd", así que se pueden comparar como texto.
 function validarEmpleado(empleado) {
-  const { anio, inicioContrato, finContrato } = empleado;
+  const { inicioContrato, finContrato } = empleado;
 
   if (inicioContrato && finContrato && finContrato < inicioContrato) {
     return "errorFechasContrato";
-  }
-
-  const fueraDelAnio = (fecha) => fecha && !fecha.startsWith(anio + "-");
-  if (fueraDelAnio(inicioContrato) || fueraDelAnio(finContrato)) {
-    return "errorContratoFueraDelAnio";
   }
 
   return "";
@@ -239,25 +234,59 @@ function mostrarModoFormulario(form, editando) {
 
 // ---------- Períodos de vacaciones ----------
 
-// Cuenta los días de vacaciones de un período, según cómo se cuentan.
+// ¿El día ("aaaa-mm-dd") cae dentro del año elegido y del contrato?
+function estaDentroDelContrato(texto) {
+  const { anio, inicioContrato, finContrato } = datos.empleado;
+  if (!texto.startsWith(anio + "-")) return false;
+  if (inicioContrato && texto < inicioContrato) return false;
+  if (finContrato && texto > finContrato) return false;
+  return true;
+}
+
+function esFestivo(texto) {
+  return datos.festivos.some((festivo) => festivo.fecha === texto);
+}
+
+function trabajaEseDia(fecha) {
+  return datos.empleado.diasLaborables.includes(fecha.getDay());
+}
+
+// ¿Un día de vacaciones se descuenta del saldo?
 // Laborables: solo los días que trabaja y que no son festivos.
 // Naturales: todos los días, festivos incluidos.
-function contarDiasDeVacaciones(periodo) {
-  const empleado = datos.empleado;
-  const festivos = datos.festivos.map((festivo) => festivo.fecha);
+// En los dos casos, solo si cae dentro del año y del contrato.
+function cuentaComoVacaciones(fecha) {
+  const texto = fechaATexto(fecha);
+  if (!estaDentroDelContrato(texto)) return false;
+  if (datos.empleado.formaDeContar === "naturales") return true;
+  return trabajaEseDia(fecha) && !esFestivo(texto);
+}
+
+// Recorre un período día por día y hace algo con cada fecha.
+function recorrerPeriodo(periodo, hacerConCadaDia) {
   const dia = leerFecha(periodo.desde);
   const fin = leerFecha(periodo.hasta);
-  let cantidad = 0;
-
   while (dia <= fin) {
-    const esLaborable =
-      empleado.diasLaborables.includes(dia.getDay()) && !festivos.includes(fechaATexto(dia));
-    if (empleado.formaDeContar === "naturales" || esLaborable) {
-      cantidad++;
-    }
+    hacerConCadaDia(new Date(dia));
     dia.setDate(dia.getDate() + 1); // pasar al día siguiente
   }
+}
+
+function contarDiasDeVacaciones(periodo) {
+  let cantidad = 0;
+  recorrerPeriodo(periodo, (fecha) => {
+    if (cuentaComoVacaciones(fecha)) cantidad++;
+  });
   return cantidad;
+}
+
+// Pasa si después de cargar el período se cambió el año o el contrato.
+function tieneDiasFueraDelContrato(periodo) {
+  let fuera = false;
+  recorrerPeriodo(periodo, (fecha) => {
+    if (!estaDentroDelContrato(fechaATexto(fecha))) fuera = true;
+  });
+  return fuera;
 }
 
 const formPeriodo = document.getElementById("form-periodo");
@@ -349,8 +378,14 @@ function mostrarPeriodos() {
     dias.className = "lista-detalle";
     dias.textContent = textos.cantidadDias.replace("{n}", contarDiasDeVacaciones(periodo));
 
+    // Aviso si parte del período quedó fuera del año o del contrato (esos días no cuentan).
+    const aviso = document.createElement("span");
+    aviso.className = "lista-aviso";
+    aviso.textContent = tieneDiasFueraDelContrato(periodo) ? textos.avisoFueraDelContrato : "";
+
     fila.append(
       fechas,
+      aviso,
       dias,
       crearBotonDeFila(textos.editar, "boton-editar", () => editarPeriodo(posicion)),
       crearBotonDeFila(textos.borrar, "boton-borrar", () => borrarPeriodo(posicion))
@@ -460,6 +495,8 @@ function mostrarFestivos() {
 // Vuelve a dibujar todo lo que depende de los datos.
 function actualizarPantalla() {
   mostrarResumen();
+  mostrarDiasPorMes();
+  mostrarCalendario();
   mostrarPeriodos();
   mostrarFestivos();
 }
