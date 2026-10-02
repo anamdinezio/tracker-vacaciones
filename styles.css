@@ -168,7 +168,7 @@ main {
 /* Número de paso delante del título de la sección: "1. Datos del empleado". */
 .paso {
   margin-right: 6px;
-  color: var(--acento); /* verde en claro, verde más luminoso en oscuro */
+  color: var(--texto-aclaracion); /* gris: acompaña al título sin competir */
 }
 
 .paso::after {
