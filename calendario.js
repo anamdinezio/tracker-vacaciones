@@ -74,7 +74,12 @@ function mostrarCalendario() {
   const anio = datos.empleado.anio;
   const contenedor = document.getElementById("calendario");
   contenedor.innerHTML = "";
-  document.getElementById("titulo-calendario").textContent = textos.calendario.replace("{anio}", anio || "");
+  const titulo = document.getElementById("titulo-calendario");
+  titulo.textContent = textos.calendario.replace("{anio}", anio || "");
+  // En la hoja impresa el título lleva también el nombre del empleado.
+  if (datos.empleado.nombre) {
+    titulo.append(crearElemento("span", "solo-impresion", " · " + datos.empleado.nombre));
+  }
   if (!anio) return; // sin año no hay calendario
 
   const porMes = diasDeVacacionesPorMes();
@@ -112,3 +117,21 @@ function mostrarCalendario() {
     contenedor.append(bloque);
   }
 }
+
+// ---------- Imprimir ----------
+
+// Al imprimir (con el botón o con Ctrl+P) sale solo el calendario; ver @media print en styles.css.
+// Si estaba plegado, se abre para imprimir y después vuelve a como estaba.
+let calendarioEstabaAbierto = true;
+
+window.addEventListener("beforeprint", () => {
+  const seccion = document.getElementById("seccion-calendario");
+  calendarioEstabaAbierto = seccion.open;
+  seccion.open = true;
+});
+
+window.addEventListener("afterprint", () => {
+  document.getElementById("seccion-calendario").open = calendarioEstabaAbierto;
+});
+
+document.getElementById("boton-imprimir").addEventListener("click", () => window.print());

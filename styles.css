@@ -586,3 +586,101 @@ form > .aclaracion:last-child {
 .descripcion + .aclaracion {
   margin-top: 0;
 }
+
+/* El botón de imprimir va a la derecha de la leyenda. */
+#boton-imprimir {
+  margin-left: auto;
+}
+
+.solo-impresion {
+  display: none;
+}
+
+/* ---------- Impresión: solo el calendario, en una hoja horizontal ---------- */
+@page {
+  size: A4 landscape;
+  margin: 10mm;
+}
+
+@media print {
+  body {
+    background: white;
+    min-height: 0;
+  }
+
+  /* Se oculta todo menos el calendario y el pie. */
+  .encabezado,
+  main > *:not(#seccion-calendario),
+  .no-imprimir,
+  .plegable summary::after {
+    display: none !important;
+  }
+
+  main {
+    max-width: none;
+    padding: 0;
+  }
+
+  .solo-impresion {
+    display: inline;
+    font-weight: normal;
+  }
+
+  #seccion-calendario {
+    margin: 0;
+    padding: 0;
+    border: none;
+  }
+
+  #seccion-calendario summary h2 {
+    margin-bottom: 4px;
+    font-size: 16pt;
+  }
+
+  .leyenda {
+    margin-bottom: 8px;
+    font-size: 9pt;
+  }
+
+  /* 4 meses por fila, 3 filas: el año entero en una hoja. */
+  .calendario {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px 18px;
+  }
+
+  .mes {
+    break-inside: avoid;
+  }
+
+  .mes-titulo {
+    margin-bottom: 2px;
+    font-size: 10pt;
+  }
+
+  .mes-grilla {
+    font-size: 8.5pt;
+  }
+
+  .dia {
+    padding: 1px 0;
+  }
+
+  .dia-hoy {
+    outline: none;
+    font-weight: normal;
+  }
+
+  /* Que la impresora respete los colores de fondo. */
+  .dia,
+  .muestra {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .pie {
+    padding: 6px 0 0;
+    border: none;
+    font-size: 8pt;
+    text-align: right;
+  }
+}

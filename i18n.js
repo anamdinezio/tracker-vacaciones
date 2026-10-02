@@ -92,6 +92,7 @@ const TEXTOS = {
     leyendaFestivo: "Festivo",
     leyendaNoLaborable: "No trabaja",
     leyendaFuera: "Fuera de contrato",
+    imprimirCalendario: "Imprimir calendario",
     avisoFueraDelContrato: "Tiene días fuera del año o del contrato, que no se cuentan.",
   },
   en: {
@@ -184,6 +185,7 @@ const TEXTOS = {
     leyendaFestivo: "Holiday",
     leyendaNoLaborable: "Day off",
     leyendaFuera: "Outside contract",
+    imprimirCalendario: "Print calendar",
     avisoFueraDelContrato: "Some days fall outside the year or contract and aren't counted.",
   },
 };
