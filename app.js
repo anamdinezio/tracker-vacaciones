@@ -61,7 +61,6 @@ function empleadoVacio() {
 }
 
 // Todo lo que guarda la app vive en un solo objeto.
-// Más adelante se suman acá los festivos.
 let datos = cargarDatos();
 
 function cargarDatos() {
@@ -75,6 +74,7 @@ function cargarDatos() {
   return {
     empleado: guardados?.empleado ?? empleadoVacio(),
     periodos: guardados?.periodos ?? [], // lista de { desde, hasta }
+    festivos: guardados?.festivos ?? [], // lista de { fecha, nombre }
   };
 }
 
@@ -206,6 +206,13 @@ function leerFecha(texto) {
   return new Date(anio, mes - 1, dia);
 }
 
+// Lo contrario: de fecha a "aaaa-mm-dd".
+function fechaATexto(fecha) {
+  const mes = String(fecha.getMonth() + 1).padStart(2, "0");
+  const dia = String(fecha.getDate()).padStart(2, "0");
+  return fecha.getFullYear() + "-" + mes + "-" + dia;
+}
+
 // Muestra una fecha sin ambigüedad: "3 ago 2026" o "3 Aug 2026".
 function formatearFecha(texto) {
   return leerFecha(texto).toLocaleDateString(idioma, { day: "numeric", month: "short", year: "numeric" });
@@ -214,15 +221,19 @@ function formatearFecha(texto) {
 // ---------- Períodos de vacaciones ----------
 
 // Cuenta los días de vacaciones de un período, según cómo se cuentan.
-// Laborables: solo los días que trabaja. Naturales: todos los días.
+// Laborables: solo los días que trabaja y que no son festivos.
+// Naturales: todos los días, festivos incluidos.
 function contarDiasDeVacaciones(periodo) {
   const empleado = datos.empleado;
+  const festivos = datos.festivos.map((festivo) => festivo.fecha);
   const dia = leerFecha(periodo.desde);
   const fin = leerFecha(periodo.hasta);
   let cantidad = 0;
 
   while (dia <= fin) {
-    if (empleado.formaDeContar === "naturales" || empleado.diasLaborables.includes(dia.getDay())) {
+    const esLaborable =
+      empleado.diasLaborables.includes(dia.getDay()) && !festivos.includes(fechaATexto(dia));
+    if (empleado.formaDeContar === "naturales" || esLaborable) {
       cantidad++;
     }
     dia.setDate(dia.getDate() + 1); // pasar al día siguiente
@@ -291,7 +302,7 @@ function mostrarPeriodos() {
     fechas.textContent = formatearFecha(periodo.desde) + " → " + formatearFecha(periodo.hasta);
 
     const dias = document.createElement("span");
-    dias.className = "periodo-dias";
+    dias.className = "lista-detalle";
     dias.textContent = textos.cantidadDias.replace("{n}", contarDiasDeVacaciones(periodo));
 
     const boton = document.createElement("button");
@@ -307,15 +318,85 @@ function mostrarPeriodos() {
   mostrarErrorPeriodo();
 }
 
+// ---------- Festivos ----------
+
+// Devuelve la clave del texto de error, o "" si el festivo se puede agregar.
+function validarFestivo(festivo) {
+  if (!festivo.fecha) return "errorFestivoSinFecha";
+  if (!festivo.fecha.startsWith(datos.empleado.anio + "-")) return "errorFestivoFueraDelAnio";
+  if (datos.festivos.some((otro) => otro.fecha === festivo.fecha)) return "errorFestivoRepetido";
+  return "";
+}
+
+const formFestivo = document.getElementById("form-festivo");
+let errorFestivo = "";
+
+function agregarFestivo(evento) {
+  evento.preventDefault(); // que el formulario no recargue la página
+
+  const festivo = { fecha: formFestivo.fecha.value, nombre: formFestivo.nombre.value.trim() };
+  errorFestivo = validarFestivo(festivo);
+  mostrarErrorFestivo();
+  if (errorFestivo) return;
+
+  datos.festivos.push(festivo);
+  datos.festivos.sort((a, b) => a.fecha.localeCompare(b.fecha)); // ordenados por fecha
+  guardarDatos();
+  formFestivo.reset();
+  actualizarPantalla();
+}
+
+function borrarFestivo(posicion) {
+  datos.festivos.splice(posicion, 1);
+  guardarDatos();
+  actualizarPantalla();
+}
+
+function mostrarErrorFestivo() {
+  const mensaje = document.getElementById("error-festivo");
+  mensaje.textContent = errorFestivo ? TEXTOS[idioma][errorFestivo] : "";
+}
+
+// Arma la lista de festivos cargados.
+function mostrarFestivos() {
+  const textos = TEXTOS[idioma];
+  const lista = document.getElementById("lista-festivos");
+  lista.innerHTML = "";
+
+  datos.festivos.forEach((festivo, posicion) => {
+    const fila = document.createElement("li");
+
+    const fecha = document.createElement("span");
+    fecha.textContent = formatearFecha(festivo.fecha);
+
+    const nombre = document.createElement("span");
+    nombre.className = "lista-detalle";
+    nombre.textContent = festivo.nombre;
+
+    const boton = document.createElement("button");
+    boton.type = "button";
+    boton.className = "boton-borrar";
+    boton.textContent = textos.borrar;
+    boton.addEventListener("click", () => borrarFestivo(posicion));
+
+    fila.append(fecha, nombre, boton);
+    lista.append(fila);
+  });
+
+  mostrarErrorFestivo();
+}
+
 // Vuelve a dibujar todo lo que depende de los datos.
 function actualizarPantalla() {
   mostrarResumen();
   mostrarPeriodos();
+  mostrarFestivos();
 }
 
 // ---------- Arranque ----------
 
 formPeriodo.addEventListener("submit", agregarPeriodo);
+formFestivo.addEventListener("submit", agregarFestivo);
 
 document.getElementById("boton-idioma").addEventListener("click", cambiarIdioma);
 formulario.addEventListener("input", alCambiarFormulario);

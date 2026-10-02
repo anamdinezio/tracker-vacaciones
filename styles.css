@@ -112,6 +112,7 @@ main {
 }
 
 .campo input {
+  height: 40px; /* misma altura para texto, números y fechas */
   padding: 8px 10px;
   border: 1px solid var(--borde);
   border-radius: 6px;
@@ -243,14 +244,14 @@ form > .aclaracion:last-child {
   margin-top: 0;
 }
 
-/* Lista de períodos cargados. */
-.lista-periodos {
+/* Listas de períodos y festivos cargados. */
+.lista {
   margin: 8px 0 0;
   padding: 0;
   list-style: none;
 }
 
-.lista-periodos li {
+.lista li {
   display: flex;
   align-items: center;
   gap: 16px;
@@ -258,7 +259,7 @@ form > .aclaracion:last-child {
   border-top: 1px solid var(--borde);
 }
 
-.periodo-dias {
+.lista-detalle {
   margin-left: auto;
   color: var(--texto-suave);
 }
@@ -308,4 +309,8 @@ form > .aclaracion:last-child {
 .encabezado-tarjeta h2,
 .encabezado-tarjeta .aclaracion {
   margin: 0;
+}
+
+.fila-agregar + .error + .aclaracion {
+  margin-top: 0;
 }

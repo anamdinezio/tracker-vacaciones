@@ -54,7 +54,27 @@
       </form>
       <p id="error-periodo" class="error"></p>
 
-      <ul id="lista-periodos" class="lista-periodos"></ul>
+      <ul id="lista-periodos" class="lista"></ul>
+    </section>
+
+    <section class="tarjeta">
+      <h2 data-i18n="festivos"></h2>
+
+      <form id="form-festivo" class="fila fila-agregar">
+        <label class="campo">
+          <span data-i18n="fecha"></span>
+          <input type="date" name="fecha">
+        </label>
+        <label class="campo">
+          <span data-i18n="nombreFestivo"></span>
+          <input type="text" name="nombre">
+        </label>
+        <button type="submit" class="boton-principal" data-i18n="agregar"></button>
+      </form>
+      <p id="error-festivo" class="error"></p>
+      <p class="aclaracion" data-i18n="notaFestivos"></p>
+
+      <ul id="lista-festivos" class="lista"></ul>
     </section>
 
     <section class="tarjeta">
