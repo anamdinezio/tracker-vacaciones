@@ -486,3 +486,35 @@ form > .aclaracion:last-child {
   outline-offset: -2px;
   font-weight: 600;
 }
+
+/* Secciones que se pliegan tocando el título. */
+.plegable summary {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  list-style: none; /* oculta el triángulo que pone el navegador */
+}
+
+.plegable summary::-webkit-details-marker {
+  display: none;
+}
+
+/* Flecha propia: apunta abajo si está abierto, a la derecha si está cerrado. */
+.plegable summary::after {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-right: 2px solid var(--texto-suave);
+  border-bottom: 2px solid var(--texto-suave);
+  transform: rotate(45deg);
+  transition: transform 0.2s;
+}
+
+.plegable:not([open]) summary::after {
+  transform: rotate(-45deg);
+}
+
+.plegable:not([open]) summary h2 {
+  margin-bottom: 0;
+}

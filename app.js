@@ -509,6 +509,21 @@ formPeriodo.querySelector(".boton-cancelar").addEventListener("click", cancelarE
 formFestivo.querySelector(".boton-cancelar").addEventListener("click", cancelarEdicionFestivo);
 
 document.getElementById("boton-idioma").addEventListener("click", cambiarIdioma);
+
+// El calendario recuerda si quedó abierto o cerrado.
+const seccionCalendario = document.getElementById("seccion-calendario");
+try {
+  if (localStorage.getItem("calendarioAbierto") === "no") seccionCalendario.open = false;
+} catch (error) {
+  // Si no se puede leer, queda abierto.
+}
+seccionCalendario.addEventListener("toggle", () => {
+  try {
+    localStorage.setItem("calendarioAbierto", seccionCalendario.open ? "si" : "no");
+  } catch (error) {
+    // Si no se puede guardar, funciona igual hasta recargar.
+  }
+});
 formulario.addEventListener("input", alCambiarFormulario);
 mostrarEmpleado();
 errorActual = validarEmpleado(datos.empleado);

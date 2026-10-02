@@ -43,8 +43,9 @@
       </div>
     </section>
 
-    <section class="tarjeta">
-      <h2 id="titulo-calendario"></h2>
+    <!-- <details> se abre y se cierra solo al tocar el título. -->
+    <details class="tarjeta plegable" id="seccion-calendario" open>
+      <summary><h2 id="titulo-calendario"></h2></summary>
       <div class="leyenda">
         <span><i class="muestra dia-vacaciones"></i> <span data-i18n="leyendaVacaciones"></span></span>
         <span><i class="muestra dia-festivo"></i> <span data-i18n="leyendaFestivo"></span></span>
@@ -52,7 +53,7 @@
         <span><i class="muestra dia-fuera"></i> <span data-i18n="leyendaFuera"></span></span>
       </div>
       <div id="calendario" class="calendario"></div>
-    </section>
+    </details>
 
     <section class="tarjeta">
       <h2 data-i18n="periodosVacaciones"></h2>
