@@ -563,3 +563,13 @@ form > .aclaracion:last-child {
   font-size: 0.85rem;
   color: #b42318;
 }
+
+/* Festivos laborables: tono suave de festivo (como en el calendario), porque no son vacaciones. */
+.indicador-festivos {
+  border-color: #f0dcb4;
+  background: #fffaf1;
+}
+
+.indicador-festivos .indicador-numero {
+  color: #a8782e;
+}
