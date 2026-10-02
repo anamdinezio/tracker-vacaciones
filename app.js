@@ -30,6 +30,7 @@ function aplicarIdioma() {
   mostrarEstadoGuardado();
   actualizarPantalla();
   mostrarResultadoImportacion();
+  mostrarResultadoRespaldo();
 }
 
 function cambiarIdioma() {
