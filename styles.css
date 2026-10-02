@@ -597,13 +597,16 @@ form > .aclaracion:last-child {
 }
 
 /* ---------- Impresión: solo el calendario, en una hoja vertical ---------- */
+/* El margen va dentro de la página (padding del body) y no en @page,
+   así se respeta aunque en la vista previa elijan "Márgenes: ninguno". */
 @page {
   size: A4 portrait;
-  margin: 10mm;
+  margin: 0;
 }
 
 @media print {
   body {
+    padding: 12mm 14mm;
     background: white;
     min-height: 0;
   }
