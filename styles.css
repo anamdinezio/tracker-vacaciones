@@ -596,9 +596,9 @@ form > .aclaracion:last-child {
   display: none;
 }
 
-/* ---------- Impresión: solo el calendario, en una hoja horizontal ---------- */
+/* ---------- Impresión: solo el calendario, en una hoja vertical ---------- */
 @page {
-  size: A4 landscape;
+  size: A4 portrait;
   margin: 10mm;
 }
 
@@ -642,10 +642,10 @@ form > .aclaracion:last-child {
     font-size: 9pt;
   }
 
-  /* 4 meses por fila, 3 filas: el año entero en una hoja. */
+  /* 3 meses por fila, 4 filas: el año entero en una hoja. */
   .calendario {
-    grid-template-columns: repeat(4, 1fr);
-    gap: 10px 18px;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 22px 24px;
   }
 
   .mes {
@@ -658,11 +658,11 @@ form > .aclaracion:last-child {
   }
 
   .mes-grilla {
-    font-size: 8.5pt;
+    font-size: 10pt;
   }
 
   .dia {
-    padding: 1px 0;
+    padding: 4px 0;
   }
 
   .dia-hoy {
