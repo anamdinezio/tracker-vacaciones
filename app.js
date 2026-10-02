@@ -189,8 +189,11 @@ function mostrarResumen() {
   document.getElementById("dias-usados").textContent = diasUsados;
   document.getElementById("dias-disponibles").textContent = diasDisponibles;
 
-  // Si se pasó de días, el número se pone en rojo.
-  document.getElementById("indicador-disponibles").classList.toggle("indicador-negativo", diasDisponibles < 0);
+  // Menos de 5 días: naranja. Si se pasó de días: rojo.
+  // Sin días cargados en el año no se marca nada.
+  const indicador = document.getElementById("indicador-disponibles");
+  indicador.classList.toggle("indicador-alerta", totalDias > 0 && diasDisponibles >= 0 && diasDisponibles < 5);
+  indicador.classList.toggle("indicador-negativo", diasDisponibles < 0);
   document.getElementById("nota-sin-periodos").hidden = datos.periodos.length > 0;
 }
 

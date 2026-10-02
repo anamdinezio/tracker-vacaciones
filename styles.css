@@ -279,6 +279,14 @@ form > .aclaracion:last-child {
   color: #b42318;
 }
 
+/* Cuando quedan menos de 5 días. */
+.indicador-alerta,
+.indicador-alerta .indicador-numero {
+  border-color: #c4620a;
+  background: #fff4e8;
+  color: #c4620a;
+}
+
 /* Cuando se usan más días de los que hay. */
 .indicador-negativo,
 .indicador-negativo .indicador-numero {
