@@ -573,3 +573,7 @@ form > .aclaracion:last-child {
 .indicador-festivos .indicador-numero {
   color: #a8782e;
 }
+
+.aclaracion + .aclaracion {
+  margin-top: -8px;
+}
