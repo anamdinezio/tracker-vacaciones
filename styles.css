@@ -577,3 +577,12 @@ form > .aclaracion:last-child {
 .aclaracion + .aclaracion {
   margin-top: -8px;
 }
+
+/* Texto normal dentro de una tarjeta (no es comentario). */
+.descripcion {
+  margin: 0 0 4px;
+}
+
+.descripcion + .aclaracion {
+  margin-top: 0;
+}
