@@ -97,11 +97,38 @@ function mostrarResultadoRespaldo() {
   caja.append(crearElemento("p", clave === "errorRespaldo" ? "error" : "aclaracion", texto));
 }
 
+// ---------- Empezar de cero ----------
+
+// Deja la página en blanco. El idioma, el tema y las secciones plegadas se mantienen.
+function borrarTodo() {
+  if (!confirm(TEXTOS[idioma].confirmarBorrarTodo)) return;
+
+  datos = { empleado: empleadoVacio(), periodos: [], festivos: [] };
+  guardarDatos();
+  cancelarEdicionPeriodo();
+  cancelarEdicionFestivo();
+  mostrarEmpleado();
+  errorActual = "";
+  mostrarError();
+  resultadoImportacion = null;
+  mostrarResultadoImportacion();
+  actualizarPantalla();
+
+  resultadoRespaldo = { clave: "datosBorrados" };
+  mostrarResultadoRespaldo();
+
+  // Volver al paso 1, abierto.
+  const seccionEmpleado = document.getElementById("seccion-empleado");
+  seccionEmpleado.open = true;
+  seccionEmpleado.scrollIntoView({ behavior: "smooth" });
+}
+
 // ---------- Botones ----------
 
 const entradaRespaldo = document.getElementById("archivo-respaldo");
 
 document.getElementById("boton-descargar-respaldo").addEventListener("click", descargarRespaldo);
+document.getElementById("boton-borrar-todo").addEventListener("click", borrarTodo);
 document.getElementById("boton-cargar-respaldo").addEventListener("click", () => entradaRespaldo.click());
 entradaRespaldo.addEventListener("change", async () => {
   if (entradaRespaldo.files.length) await cargarRespaldo(entradaRespaldo.files[0]);

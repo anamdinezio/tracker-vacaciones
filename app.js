@@ -228,6 +228,11 @@ function mostrarResumen() {
     arrastrados > 0 ? textos.incluyeArrastrados.replace("{n}", arrastrados) : "";
   document.getElementById("dias-usados").textContent = diasUsados;
 
+  // El mismo saldo, en chico, debajo del formulario de períodos.
+  document.getElementById("saldo-periodos").textContent = datos.periodos.length
+    ? textos.saldoPeriodos.replace("{usados}", diasUsados).replace("{disponibles}", diasDisponibles)
+    : "";
+
   // Festivos que caen en un día que trabaja (dentro del contrato): son días libres extra.
   const festivosLaborables = datos.festivos.filter(
     (festivo) => estaDentroDelContrato(festivo.fecha) && trabajaEseDia(leerFecha(festivo.fecha))
@@ -562,20 +567,37 @@ formFestivo.querySelector(".boton-cancelar").addEventListener("click", cancelarE
 document.getElementById("boton-idioma").addEventListener("click", cambiarIdioma);
 document.getElementById("boton-tema").addEventListener("click", cambiarTema);
 
-// Las secciones plegables recuerdan si quedaron abiertas o cerradas.
+// Las secciones plegables recuerdan si el usuario las abrió o cerró.
+// Si nunca las tocó: "Datos del empleado" arranca plegada cuando ya está completa,
+// así quien vuelve llega rápido a sus vacaciones. Las demás arrancan abiertas.
+function empleadoCompleto() {
+  const empleado = datos.empleado;
+  return empleado.nombre !== "" && empleado.diasVacaciones !== "" && !validarEmpleado(empleado);
+}
+
 document.querySelectorAll(".plegable").forEach((seccion) => {
-  const clave = "abierto-" + seccion.id;
+  const clave = "plegable-" + seccion.id;
+  let elegido = null;
   try {
-    if (localStorage.getItem(clave) === "no") seccion.open = false;
+    elegido = localStorage.getItem(clave);
   } catch (error) {
-    // Si no se puede leer, queda abierta.
+    // Si no se puede leer, se usa el valor de inicio.
   }
-  seccion.addEventListener("toggle", () => {
-    try {
-      localStorage.setItem(clave, seccion.open ? "si" : "no");
-    } catch (error) {
-      // Si no se puede guardar, funciona igual hasta recargar.
-    }
+  if (elegido) {
+    seccion.open = elegido === "abierta";
+  } else if (seccion.id === "seccion-empleado") {
+    seccion.open = !empleadoCompleto();
+  }
+
+  // Se guarda solo cuando el usuario toca el título (no cuando la abre el código).
+  seccion.querySelector("summary").addEventListener("click", () => {
+    setTimeout(() => {
+      try {
+        localStorage.setItem(clave, seccion.open ? "abierta" : "cerrada");
+      } catch (error) {
+        // Si no se puede guardar, funciona igual hasta recargar.
+      }
+    });
   });
 });
 formulario.addEventListener("input", alCambiarFormulario);

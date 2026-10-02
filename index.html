@@ -32,103 +32,9 @@
     <p class="intro" data-i18n="intro"></p>
     <p class="aclaracion" data-i18n="notaPrivacidad"></p>
 
-    <section class="tarjeta">
-      <div class="encabezado-tarjeta">
-        <h2 id="titulo-resumen"></h2>
-        <p class="aclaracion" id="estado-guardado"></p>
-      </div>
-      <div class="indicadores">
-        <div class="indicador">
-          <span class="indicador-numero" id="total-dias"></span>
-          <span data-i18n="totalDias"></span>
-          <span class="indicador-detalle" id="detalle-arrastrados"></span>
-        </div>
-        <div class="indicador">
-          <span class="indicador-numero" id="dias-usados"></span>
-          <span data-i18n="diasUsados"></span>
-        </div>
-        <div class="indicador indicador-destacado" id="indicador-disponibles">
-          <span class="indicador-numero" id="dias-disponibles"></span>
-          <span data-i18n="diasDisponibles"></span>
-        </div>
-        <div class="indicador indicador-festivos">
-          <span class="indicador-numero" id="festivos-laborables"></span>
-          <span data-i18n="festivosLaborables"></span>
-          <span class="indicador-detalle" data-i18n="noSeDescuentan"></span>
-        </div>
-      </div>
-      <p class="aclaracion" id="nota-sin-periodos" data-i18n="notaSinPeriodos"></p>
-
-      <div id="bloque-dias-por-mes">
-        <h3 data-i18n="diasPorMes"></h3>
-        <div id="dias-por-mes" class="grafico-meses"></div>
-      </div>
-    </section>
-
     <!-- <details> se abre y se cierra solo al tocar el título. -->
-    <details class="tarjeta plegable" id="seccion-calendario" open>
-      <summary><h2 id="titulo-calendario"></h2></summary>
-      <div class="leyenda">
-        <span><i class="muestra dia-vacaciones"></i> <span data-i18n="leyendaVacaciones"></span></span>
-        <span><i class="muestra dia-festivo"></i> <span data-i18n="leyendaFestivo"></span></span>
-        <span><i class="muestra dia-no-laborable"></i> <span data-i18n="leyendaNoLaborable"></span></span>
-        <span><i class="muestra dia-fuera"></i> <span data-i18n="leyendaFuera"></span></span>
-        <button type="button" class="boton-enlace no-imprimir" id="boton-imprimir" data-i18n="imprimirCalendario"></button>
-      </div>
-      <div id="calendario" class="calendario"></div>
-    </details>
-
-    <section class="tarjeta">
-      <h2 data-i18n="periodosVacaciones"></h2>
-
-      <form id="form-periodo" class="fila fila-agregar">
-        <label class="campo">
-          <span data-i18n="desde"></span>
-          <input type="date" name="desde">
-        </label>
-        <label class="campo">
-          <span data-i18n="hasta"></span>
-          <input type="date" name="hasta">
-        </label>
-        <button type="submit" class="boton-principal"></button>
-        <button type="button" class="boton-secundario boton-cancelar" data-i18n="cancelar" hidden></button>
-      </form>
-      <p id="error-periodo" class="error"></p>
-
-      <ul id="lista-periodos" class="lista"></ul>
-    </section>
-
-    <details class="tarjeta plegable" id="seccion-festivos" open>
-      <summary><h2 data-i18n="festivos"></h2></summary>
-
-      <form id="form-festivo" class="fila fila-agregar">
-        <label class="campo">
-          <span data-i18n="fecha"></span>
-          <input type="date" name="fecha">
-        </label>
-        <label class="campo">
-          <span data-i18n="nombreFestivo"></span>
-          <input type="text" name="nombre">
-        </label>
-        <button type="submit" class="boton-principal"></button>
-        <button type="button" class="boton-secundario boton-cancelar" data-i18n="cancelar" hidden></button>
-      </form>
-      <p id="error-festivo" class="error"></p>
-      <p class="aclaracion" data-i18n="notaFestivos"></p>
-
-      <div class="acciones">
-        <button type="button" class="boton-secundario" id="boton-importar" data-i18n="importarFestivos"></button>
-        <button type="button" class="boton-enlace" id="boton-plantilla" data-i18n="descargarPlantilla"></button>
-        <input type="file" id="archivo-festivos" accept=".csv,.xlsx,.xls" hidden>
-      </div>
-      <p class="aclaracion" data-i18n="notaImportar"></p>
-      <div id="resultado-importacion"></div>
-
-      <ul id="lista-festivos" class="lista"></ul>
-    </details>
-
     <details class="tarjeta plegable" id="seccion-empleado" open>
-      <summary><h2 data-i18n="datosEmpleado"></h2></summary>
+      <summary><h2><span class="paso">1</span><span data-i18n="datosEmpleado"></span></h2></summary>
 
       <form id="form-empleado">
         <label class="campo">
@@ -189,6 +95,101 @@
       </form>
     </details>
 
+    <details class="tarjeta plegable" id="seccion-festivos" open>
+      <summary><h2><span class="paso">2</span><span data-i18n="festivos"></span></h2></summary>
+
+      <form id="form-festivo" class="fila fila-agregar">
+        <label class="campo">
+          <span data-i18n="fecha"></span>
+          <input type="date" name="fecha">
+        </label>
+        <label class="campo">
+          <span data-i18n="nombreFestivo"></span>
+          <input type="text" name="nombre">
+        </label>
+        <button type="submit" class="boton-principal"></button>
+        <button type="button" class="boton-secundario boton-cancelar" data-i18n="cancelar" hidden></button>
+      </form>
+      <p id="error-festivo" class="error"></p>
+      <p class="aclaracion" data-i18n="notaFestivos"></p>
+
+      <div class="acciones">
+        <button type="button" class="boton-secundario" id="boton-importar" data-i18n="importarFestivos"></button>
+        <button type="button" class="boton-enlace" id="boton-plantilla" data-i18n="descargarPlantilla"></button>
+        <input type="file" id="archivo-festivos" accept=".csv,.xlsx,.xls" hidden>
+      </div>
+      <p class="aclaracion" data-i18n="notaImportar"></p>
+      <div id="resultado-importacion"></div>
+
+      <ul id="lista-festivos" class="lista"></ul>
+    </details>
+
+    <section class="tarjeta">
+      <h2><span class="paso">3</span><span data-i18n="periodosVacaciones"></span></h2>
+
+      <form id="form-periodo" class="fila fila-agregar">
+        <label class="campo">
+          <span data-i18n="desde"></span>
+          <input type="date" name="desde">
+        </label>
+        <label class="campo">
+          <span data-i18n="hasta"></span>
+          <input type="date" name="hasta">
+        </label>
+        <button type="submit" class="boton-principal"></button>
+        <button type="button" class="boton-secundario boton-cancelar" data-i18n="cancelar" hidden></button>
+      </form>
+      <p id="error-periodo" class="error"></p>
+      <p class="aclaracion" id="saldo-periodos"></p>
+
+      <ul id="lista-periodos" class="lista"></ul>
+    </section>
+
+    <section class="tarjeta">
+      <div class="encabezado-tarjeta">
+        <h2><span class="paso">4</span><span id="titulo-resumen"></span></h2>
+        <p class="aclaracion" id="estado-guardado"></p>
+      </div>
+      <div class="indicadores">
+        <div class="indicador">
+          <span class="indicador-numero" id="total-dias"></span>
+          <span data-i18n="totalDias"></span>
+          <span class="indicador-detalle" id="detalle-arrastrados"></span>
+        </div>
+        <div class="indicador">
+          <span class="indicador-numero" id="dias-usados"></span>
+          <span data-i18n="diasUsados"></span>
+        </div>
+        <div class="indicador indicador-destacado" id="indicador-disponibles">
+          <span class="indicador-numero" id="dias-disponibles"></span>
+          <span data-i18n="diasDisponibles"></span>
+        </div>
+        <div class="indicador indicador-festivos">
+          <span class="indicador-numero" id="festivos-laborables"></span>
+          <span data-i18n="festivosLaborables"></span>
+          <span class="indicador-detalle" data-i18n="noSeDescuentan"></span>
+        </div>
+      </div>
+      <p class="aclaracion" id="nota-sin-periodos" data-i18n="notaSinPeriodos"></p>
+
+      <div id="bloque-dias-por-mes">
+        <h3 data-i18n="diasPorMes"></h3>
+        <div id="dias-por-mes" class="grafico-meses"></div>
+      </div>
+    </section>
+
+    <details class="tarjeta plegable" id="seccion-calendario" open>
+      <summary><h2 id="titulo-calendario"></h2></summary>
+      <div class="leyenda">
+        <span><i class="muestra dia-vacaciones"></i> <span data-i18n="leyendaVacaciones"></span></span>
+        <span><i class="muestra dia-festivo"></i> <span data-i18n="leyendaFestivo"></span></span>
+        <span><i class="muestra dia-no-laborable"></i> <span data-i18n="leyendaNoLaborable"></span></span>
+        <span><i class="muestra dia-fuera"></i> <span data-i18n="leyendaFuera"></span></span>
+        <button type="button" class="boton-enlace no-imprimir" id="boton-imprimir" data-i18n="imprimirCalendario"></button>
+      </div>
+      <div id="calendario" class="calendario"></div>
+    </details>
+
     <section class="tarjeta">
       <h2 data-i18n="respaldo"></h2>
       <p class="descripcion" data-i18n="notaRespaldo"></p>
@@ -197,6 +198,7 @@
         <button type="button" class="boton-secundario" id="boton-descargar-respaldo" data-i18n="descargarRespaldo"></button>
         <button type="button" class="boton-secundario" id="boton-cargar-respaldo" data-i18n="cargarRespaldo"></button>
         <input type="file" id="archivo-respaldo" accept=".json,application/json" hidden>
+        <button type="button" class="boton-secundario boton-peligro" id="boton-borrar-todo" data-i18n="borrarTodo"></button>
       </div>
       <div id="resultado-respaldo"></div>
     </section>

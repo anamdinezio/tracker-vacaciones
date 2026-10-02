@@ -159,8 +159,26 @@ main {
 }
 
 .tarjeta h2 {
+  display: flex;
+  align-items: center;
   margin: 0 0 16px;
   font-size: 1.1rem;
+}
+
+/* Número de paso (1, 2, 3, 4) delante del título de la sección. */
+.paso {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  margin-right: 10px;
+  border-radius: 50%;
+  background: var(--acento);
+  color: var(--texto-sobre-acento);
+  font-size: 0.8rem;
+  font-weight: 600;
 }
 
 /* Un campo: el texto arriba y la casilla abajo. */
@@ -363,6 +381,8 @@ form > .aclaracion:last-child {
   display: none;
 }
 
+/* Botón que borra datos: se pone rojo al pasar el mouse. */
+.boton-peligro:hover,
 .boton-borrar:hover {
   border-color: var(--error);
   color: var(--error);
@@ -748,5 +768,25 @@ form > .aclaracion:last-child {
     border: none;
     font-size: 8pt;
     text-align: right;
+  }
+}
+
+/* Saldo debajo del formulario de períodos. */
+#saldo-periodos {
+  margin: 0 0 4px;
+}
+
+#saldo-periodos:empty {
+  display: none;
+}
+
+/* "Empezar de cero" queda separado de los otros botones. */
+.acciones .boton-peligro {
+  margin-left: auto;
+}
+
+@media print {
+  .paso {
+    display: none;
   }
 }
