@@ -784,3 +784,7 @@ form > .aclaracion:last-child {
     display: none;
   }
 }
+
+#nota-proporcional:empty {
+  display: none;
+}

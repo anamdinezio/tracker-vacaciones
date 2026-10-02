@@ -208,12 +208,58 @@ function mostrarEstadoGuardado() {
 
 // ---------- Resumen ----------
 
+// Días de vacaciones que le tocan en el año elegido.
+// Si el contrato no cubre el año entero, se calcula la parte proporcional:
+// días por año completo × días de contrato en el año / días del año, redondeado al más cercano.
+function calcularDiasDelAnio() {
+  const { anio, inicioContrato, finContrato, diasVacaciones } = datos.empleado;
+  const completo = Number(diasVacaciones); // Number("") da 0
+  const inicioAnio = anio + "-01-01";
+  const finAnio = anio + "-12-31";
+
+  // La parte del contrato que cae dentro del año.
+  const desde = inicioContrato && inicioContrato > inicioAnio ? inicioContrato : inicioAnio;
+  const hasta = finContrato && finContrato < finAnio ? finContrato : finAnio;
+
+  const UN_DIA = 24 * 60 * 60 * 1000;
+  const diasAnio = Math.round((leerFecha(finAnio) - leerFecha(inicioAnio)) / UN_DIA) + 1; // 365 o 366
+  const diasContrato = hasta < desde ? 0 : Math.round((leerFecha(hasta) - leerFecha(desde)) / UN_DIA) + 1;
+
+  const exacto = (completo * diasContrato) / diasAnio;
+  return {
+    completo,
+    diasContrato,
+    diasAnio,
+    exacto,
+    dias: Math.round(exacto),
+    esProporcional: anio > 0 && diasContrato < diasAnio,
+  };
+}
+
+// Debajo del campo de días: cómo se calculó la parte proporcional.
+function mostrarCalculoProporcional(calculo) {
+  const textos = TEXTOS[idioma];
+  const nota = document.getElementById("nota-proporcional");
+  if (!calculo.esProporcional || calculo.completo <= 0) {
+    nota.textContent = "";
+    return;
+  }
+  const decimales = calculo.exacto.toLocaleString(idioma, { maximumFractionDigits: 2 });
+  nota.textContent = textos.calculoProporcional
+    .replace("{completo}", calculo.completo)
+    .replaceAll("{contrato}", calculo.diasContrato)
+    .replaceAll("{anio}", calculo.diasAnio)
+    .replace("{exacto}", decimales)
+    .replace("{dias}", calculo.dias);
+}
+
 function mostrarResumen() {
   const textos = TEXTOS[idioma];
   const empleado = datos.empleado;
 
-  // Number("") da 0, así que los campos vacíos cuentan como cero.
-  const totalDias = Number(empleado.diasVacaciones) + Number(empleado.diasArrastrados);
+  const calculo = calcularDiasDelAnio();
+  mostrarCalculoProporcional(calculo);
+  const totalDias = calculo.dias + Number(empleado.diasArrastrados);
   const diasUsados = datos.periodos.reduce((suma, periodo) => suma + contarDiasDeVacaciones(periodo), 0);
   const diasDisponibles = totalDias - diasUsados;
 
@@ -222,10 +268,17 @@ function mostrarResumen() {
     : textos.resumen;
   document.getElementById("total-dias").textContent = totalDias;
 
-  // Si hay días del año anterior, se aclaran entre paréntesis.
+  // Entre paréntesis: si es proporcional y si incluye días del año anterior.
   const arrastrados = Number(empleado.diasArrastrados);
-  document.getElementById("detalle-arrastrados").textContent =
-    arrastrados > 0 ? textos.incluyeArrastrados.replace("{n}", arrastrados) : "";
+  let detalle = "";
+  if (calculo.esProporcional && arrastrados > 0) {
+    detalle = textos.proporcionalMasArrastrados.replace("{dias}", calculo.dias).replace("{n}", arrastrados);
+  } else if (calculo.esProporcional && calculo.completo > 0) {
+    detalle = textos.proporcionalAlContrato;
+  } else if (arrastrados > 0) {
+    detalle = textos.incluyeArrastrados.replace("{n}", arrastrados);
+  }
+  document.getElementById("detalle-arrastrados").textContent = detalle;
   document.getElementById("dias-usados").textContent = diasUsados;
 
   // El mismo saldo, en chico, debajo del formulario de períodos.
