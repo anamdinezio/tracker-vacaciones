@@ -515,19 +515,21 @@ formFestivo.querySelector(".boton-cancelar").addEventListener("click", cancelarE
 
 document.getElementById("boton-idioma").addEventListener("click", cambiarIdioma);
 
-// El calendario recuerda si quedó abierto o cerrado.
-const seccionCalendario = document.getElementById("seccion-calendario");
-try {
-  if (localStorage.getItem("calendarioAbierto") === "no") seccionCalendario.open = false;
-} catch (error) {
-  // Si no se puede leer, queda abierto.
-}
-seccionCalendario.addEventListener("toggle", () => {
+// Las secciones plegables recuerdan si quedaron abiertas o cerradas.
+document.querySelectorAll(".plegable").forEach((seccion) => {
+  const clave = "abierto-" + seccion.id;
   try {
-    localStorage.setItem("calendarioAbierto", seccionCalendario.open ? "si" : "no");
+    if (localStorage.getItem(clave) === "no") seccion.open = false;
   } catch (error) {
-    // Si no se puede guardar, funciona igual hasta recargar.
+    // Si no se puede leer, queda abierta.
   }
+  seccion.addEventListener("toggle", () => {
+    try {
+      localStorage.setItem(clave, seccion.open ? "si" : "no");
+    } catch (error) {
+      // Si no se puede guardar, funciona igual hasta recargar.
+    }
+  });
 });
 formulario.addEventListener("input", alCambiarFormulario);
 mostrarEmpleado();
