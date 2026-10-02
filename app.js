@@ -189,6 +189,12 @@ function mostrarResumen() {
   document.getElementById("detalle-arrastrados").textContent =
     arrastrados > 0 ? textos.incluyeArrastrados.replace("{n}", arrastrados) : "";
   document.getElementById("dias-usados").textContent = diasUsados;
+
+  // Festivos que caen en un día que trabaja (dentro del contrato): son días libres extra.
+  const festivosLaborables = datos.festivos.filter(
+    (festivo) => estaDentroDelContrato(festivo.fecha) && trabajaEseDia(leerFecha(festivo.fecha))
+  ).length;
+  document.getElementById("festivos-laborables").textContent = festivosLaborables;
   document.getElementById("dias-disponibles").textContent = diasDisponibles;
 
   // Menos de 5 días: naranja. Si se pasó de días: rojo.
