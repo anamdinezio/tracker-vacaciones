@@ -254,17 +254,17 @@ form > .aclaracion:last-child {
 .lista li {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 8px;
   padding: 10px 0;
   border-top: 1px solid var(--borde);
 }
 
 .lista-detalle {
-  margin-left: auto;
+  margin: 0 8px 0 auto;
   color: var(--texto-suave);
 }
 
-.boton-borrar {
+.boton-chico {
   padding: 4px 10px;
   border: 1px solid var(--borde);
   border-radius: 6px;
@@ -273,6 +273,31 @@ form > .aclaracion:last-child {
   font: inherit;
   font-size: 0.85rem;
   cursor: pointer;
+}
+
+.boton-editar:hover {
+  border-color: var(--acento);
+  color: var(--acento);
+}
+
+/* La fila que se está editando queda resaltada. */
+.lista li.fila-editando {
+  background: #eef5f3;
+}
+
+.boton-secundario {
+  margin-bottom: 12px;
+  padding: 9px 16px;
+  border: 1px solid var(--borde);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--texto-suave);
+  font: inherit;
+  cursor: pointer;
+}
+
+.boton-secundario[hidden] {
+  display: none;
 }
 
 .boton-borrar:hover {

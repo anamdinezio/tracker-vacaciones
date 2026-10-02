@@ -218,6 +218,25 @@ function formatearFecha(texto) {
   return leerFecha(texto).toLocaleDateString(idioma, { day: "numeric", month: "short", year: "numeric" });
 }
 
+// ---------- Listas: botones compartidos ----------
+
+// Crea un botón chico para una fila de la lista (Editar o Borrar).
+function crearBotonDeFila(texto, clase, alHacerClic) {
+  const boton = document.createElement("button");
+  boton.type = "button";
+  boton.className = "boton-chico " + clase;
+  boton.textContent = texto;
+  boton.addEventListener("click", alHacerClic);
+  return boton;
+}
+
+// Cambia el formulario entre "Agregar" y "Guardar cambios" (con Cancelar).
+function mostrarModoFormulario(form, editando) {
+  const textos = TEXTOS[idioma];
+  form.querySelector("[type=submit]").textContent = editando ? textos.guardarCambios : textos.agregar;
+  form.querySelector(".boton-cancelar").hidden = !editando;
+}
+
 // ---------- Períodos de vacaciones ----------
 
 // Cuenta los días de vacaciones de un período, según cómo se cuentan.
@@ -241,7 +260,11 @@ function contarDiasDeVacaciones(periodo) {
   return cantidad;
 }
 
-// Devuelve la clave del texto de error, o "" si el período se puede agregar.
+const formPeriodo = document.getElementById("form-periodo");
+let errorPeriodo = "";
+let periodoEditando = -1; // posición del período que se está editando; -1 si ninguno
+
+// Devuelve la clave del texto de error, o "" si el período se puede guardar.
 function validarPeriodo(periodo) {
   const { desde, hasta } = periodo;
   const { anio, inicioContrato, finContrato } = datos.empleado;
@@ -254,16 +277,16 @@ function validarPeriodo(periodo) {
   }
 
   // Dos períodos se pisan si uno empieza antes de que termine el otro.
-  const sePisa = datos.periodos.some((otro) => desde <= otro.hasta && hasta >= otro.desde);
+  // El que se está editando no cuenta, porque se va a reemplazar.
+  const sePisa = datos.periodos.some(
+    (otro, posicion) => posicion !== periodoEditando && desde <= otro.hasta && hasta >= otro.desde
+  );
   if (sePisa) return "errorPeriodoSolapado";
 
   return "";
 }
 
-const formPeriodo = document.getElementById("form-periodo");
-let errorPeriodo = "";
-
-function agregarPeriodo(evento) {
+function guardarPeriodo(evento) {
   evento.preventDefault(); // que el formulario no recargue la página
 
   const periodo = { desde: formPeriodo.desde.value, hasta: formPeriodo.hasta.value };
@@ -271,9 +294,29 @@ function agregarPeriodo(evento) {
   mostrarErrorPeriodo();
   if (errorPeriodo) return;
 
-  datos.periodos.push(periodo);
+  if (periodoEditando >= 0) {
+    datos.periodos[periodoEditando] = periodo; // reemplaza el que se estaba editando
+  } else {
+    datos.periodos.push(periodo);
+  }
   datos.periodos.sort((a, b) => a.desde.localeCompare(b.desde)); // ordenados por fecha
   guardarDatos();
+  cancelarEdicionPeriodo();
+}
+
+// Pasa las fechas del período al formulario de arriba para cambiarlas.
+function editarPeriodo(posicion) {
+  periodoEditando = posicion;
+  formPeriodo.desde.value = datos.periodos[posicion].desde;
+  formPeriodo.hasta.value = datos.periodos[posicion].hasta;
+  errorPeriodo = "";
+  actualizarPantalla();
+  formPeriodo.desde.focus();
+}
+
+function cancelarEdicionPeriodo() {
+  periodoEditando = -1;
+  errorPeriodo = "";
   formPeriodo.reset();
   actualizarPantalla();
 }
@@ -281,7 +324,7 @@ function agregarPeriodo(evento) {
 function borrarPeriodo(posicion) {
   datos.periodos.splice(posicion, 1);
   guardarDatos();
-  actualizarPantalla();
+  cancelarEdicionPeriodo();
 }
 
 function mostrarErrorPeriodo() {
@@ -297,6 +340,7 @@ function mostrarPeriodos() {
 
   datos.periodos.forEach((periodo, posicion) => {
     const fila = document.createElement("li");
+    fila.classList.toggle("fila-editando", posicion === periodoEditando);
 
     const fechas = document.createElement("span");
     fechas.textContent = formatearFecha(periodo.desde) + " → " + formatearFecha(periodo.hasta);
@@ -305,33 +349,39 @@ function mostrarPeriodos() {
     dias.className = "lista-detalle";
     dias.textContent = textos.cantidadDias.replace("{n}", contarDiasDeVacaciones(periodo));
 
-    const boton = document.createElement("button");
-    boton.type = "button";
-    boton.className = "boton-borrar";
-    boton.textContent = textos.borrar;
-    boton.addEventListener("click", () => borrarPeriodo(posicion));
-
-    fila.append(fechas, dias, boton);
+    fila.append(
+      fechas,
+      dias,
+      crearBotonDeFila(textos.editar, "boton-editar", () => editarPeriodo(posicion)),
+      crearBotonDeFila(textos.borrar, "boton-borrar", () => borrarPeriodo(posicion))
+    );
     lista.append(fila);
   });
 
+  mostrarModoFormulario(formPeriodo, periodoEditando >= 0);
   mostrarErrorPeriodo();
 }
 
 // ---------- Festivos ----------
 
-// Devuelve la clave del texto de error, o "" si el festivo se puede agregar.
+const formFestivo = document.getElementById("form-festivo");
+let errorFestivo = "";
+let festivoEditando = -1; // posición del festivo que se está editando; -1 si ninguno
+
+// Devuelve la clave del texto de error, o "" si el festivo se puede guardar.
 function validarFestivo(festivo) {
   if (!festivo.fecha) return "errorFestivoSinFecha";
   if (!festivo.fecha.startsWith(datos.empleado.anio + "-")) return "errorFestivoFueraDelAnio";
-  if (datos.festivos.some((otro) => otro.fecha === festivo.fecha)) return "errorFestivoRepetido";
+
+  const repetido = datos.festivos.some(
+    (otro, posicion) => posicion !== festivoEditando && otro.fecha === festivo.fecha
+  );
+  if (repetido) return "errorFestivoRepetido";
+
   return "";
 }
 
-const formFestivo = document.getElementById("form-festivo");
-let errorFestivo = "";
-
-function agregarFestivo(evento) {
+function guardarFestivo(evento) {
   evento.preventDefault(); // que el formulario no recargue la página
 
   const festivo = { fecha: formFestivo.fecha.value, nombre: formFestivo.nombre.value.trim() };
@@ -339,9 +389,29 @@ function agregarFestivo(evento) {
   mostrarErrorFestivo();
   if (errorFestivo) return;
 
-  datos.festivos.push(festivo);
+  if (festivoEditando >= 0) {
+    datos.festivos[festivoEditando] = festivo; // reemplaza el que se estaba editando
+  } else {
+    datos.festivos.push(festivo);
+  }
   datos.festivos.sort((a, b) => a.fecha.localeCompare(b.fecha)); // ordenados por fecha
   guardarDatos();
+  cancelarEdicionFestivo();
+}
+
+// Pasa el festivo al formulario de arriba para cambiarlo.
+function editarFestivo(posicion) {
+  festivoEditando = posicion;
+  formFestivo.fecha.value = datos.festivos[posicion].fecha;
+  formFestivo.nombre.value = datos.festivos[posicion].nombre;
+  errorFestivo = "";
+  actualizarPantalla();
+  formFestivo.fecha.focus();
+}
+
+function cancelarEdicionFestivo() {
+  festivoEditando = -1;
+  errorFestivo = "";
   formFestivo.reset();
   actualizarPantalla();
 }
@@ -349,7 +419,7 @@ function agregarFestivo(evento) {
 function borrarFestivo(posicion) {
   datos.festivos.splice(posicion, 1);
   guardarDatos();
-  actualizarPantalla();
+  cancelarEdicionFestivo();
 }
 
 function mostrarErrorFestivo() {
@@ -365,6 +435,7 @@ function mostrarFestivos() {
 
   datos.festivos.forEach((festivo, posicion) => {
     const fila = document.createElement("li");
+    fila.classList.toggle("fila-editando", posicion === festivoEditando);
 
     const fecha = document.createElement("span");
     fecha.textContent = formatearFecha(festivo.fecha);
@@ -373,16 +444,16 @@ function mostrarFestivos() {
     nombre.className = "lista-detalle";
     nombre.textContent = festivo.nombre;
 
-    const boton = document.createElement("button");
-    boton.type = "button";
-    boton.className = "boton-borrar";
-    boton.textContent = textos.borrar;
-    boton.addEventListener("click", () => borrarFestivo(posicion));
-
-    fila.append(fecha, nombre, boton);
+    fila.append(
+      fecha,
+      nombre,
+      crearBotonDeFila(textos.editar, "boton-editar", () => editarFestivo(posicion)),
+      crearBotonDeFila(textos.borrar, "boton-borrar", () => borrarFestivo(posicion))
+    );
     lista.append(fila);
   });
 
+  mostrarModoFormulario(formFestivo, festivoEditando >= 0);
   mostrarErrorFestivo();
 }
 
@@ -395,8 +466,10 @@ function actualizarPantalla() {
 
 // ---------- Arranque ----------
 
-formPeriodo.addEventListener("submit", agregarPeriodo);
-formFestivo.addEventListener("submit", agregarFestivo);
+formPeriodo.addEventListener("submit", guardarPeriodo);
+formFestivo.addEventListener("submit", guardarFestivo);
+formPeriodo.querySelector(".boton-cancelar").addEventListener("click", cancelarEdicionPeriodo);
+formFestivo.querySelector(".boton-cancelar").addEventListener("click", cancelarEdicionFestivo);
 
 document.getElementById("boton-idioma").addEventListener("click", cambiarIdioma);
 formulario.addEventListener("input", alCambiarFormulario);
