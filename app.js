@@ -29,6 +29,7 @@ function aplicarIdioma() {
   mostrarError();
   mostrarEstadoGuardado();
   actualizarPantalla();
+  mostrarResultadoImportacion();
 }
 
 function cambiarIdioma() {

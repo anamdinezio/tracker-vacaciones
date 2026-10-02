@@ -94,6 +94,14 @@
       <p id="error-festivo" class="error"></p>
       <p class="aclaracion" data-i18n="notaFestivos"></p>
 
+      <div class="acciones">
+        <button type="button" class="boton-secundario" id="boton-importar" data-i18n="importarFestivos"></button>
+        <button type="button" class="boton-enlace" id="boton-plantilla" data-i18n="descargarPlantilla"></button>
+        <input type="file" id="archivo-festivos" accept=".csv,.xlsx,.xls" hidden>
+      </div>
+      <p class="aclaracion" data-i18n="notaImportar"></p>
+      <div id="resultado-importacion"></div>
+
       <ul id="lista-festivos" class="lista"></ul>
     </section>
 
@@ -167,6 +175,7 @@
 
   <script src="i18n.js"></script>
   <script src="calendario.js"></script>
+  <script src="importar.js"></script>
   <script src="app.js"></script>
 </body>
 </html>
