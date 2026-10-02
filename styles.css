@@ -286,3 +286,18 @@ form > .aclaracion:last-child {
   background: #fdf0ef;
   color: #b42318;
 }
+
+/* Título de tarjeta con un dato al costado (por ejemplo, la hora de guardado). */
+.encabezado-tarjeta {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 4px 16px;
+  margin-bottom: 16px;
+}
+
+.encabezado-tarjeta h2,
+.encabezado-tarjeta .aclaracion {
+  margin: 0;
+}
