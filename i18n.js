@@ -4,7 +4,7 @@
 const TEXTOS = {
   es: {
     titulo: "Gestor de vacaciones",
-    intro: "Calculá los días de vacaciones usados y disponibles de un empleado. Los datos quedan solo en tu navegador.",
+    intro: "Registra los días de vacaciones usados y disponibles de un empleado. Los datos quedan solo en tu navegador.",
     hechoPor: "Hecho por",
     cambiarIdioma: "English",
   },
