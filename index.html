@@ -27,12 +27,31 @@
           <span class="indicador-numero" id="dias-usados"></span>
           <span data-i18n="diasUsados"></span>
         </div>
-        <div class="indicador indicador-destacado">
+        <div class="indicador indicador-destacado" id="indicador-disponibles">
           <span class="indicador-numero" id="dias-disponibles"></span>
           <span data-i18n="diasDisponibles"></span>
         </div>
       </div>
-      <p class="aclaracion" data-i18n="notaSinPeriodos"></p>
+      <p class="aclaracion" id="nota-sin-periodos" data-i18n="notaSinPeriodos"></p>
+    </section>
+
+    <section class="tarjeta">
+      <h2 data-i18n="periodosVacaciones"></h2>
+
+      <form id="form-periodo" class="fila fila-agregar">
+        <label class="campo">
+          <span data-i18n="desde"></span>
+          <input type="date" name="desde">
+        </label>
+        <label class="campo">
+          <span data-i18n="hasta"></span>
+          <input type="date" name="hasta">
+        </label>
+        <button type="submit" class="boton-principal" data-i18n="agregar"></button>
+      </form>
+      <p id="error-periodo" class="error"></p>
+
+      <ul id="lista-periodos" class="lista-periodos"></ul>
     </section>
 
     <section class="tarjeta">

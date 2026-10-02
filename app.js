@@ -28,7 +28,7 @@ function aplicarIdioma() {
   document.getElementById("boton-idioma").textContent = textos.cambiarIdioma;
   mostrarError();
   mostrarEstadoGuardado();
-  mostrarResumen();
+  actualizarPantalla();
 }
 
 function cambiarIdioma() {
@@ -61,17 +61,21 @@ function empleadoVacio() {
 }
 
 // Todo lo que guarda la app vive en un solo objeto.
-// Más adelante se suman acá los festivos y los períodos de vacaciones.
+// Más adelante se suman acá los festivos.
 let datos = cargarDatos();
 
 function cargarDatos() {
+  let guardados = null;
   try {
     const texto = localStorage.getItem(CLAVE_DATOS);
-    if (texto) return JSON.parse(texto);
+    if (texto) guardados = JSON.parse(texto);
   } catch (error) {
     // Si no se puede leer, arrancamos de cero.
   }
-  return { empleado: empleadoVacio() };
+  return {
+    empleado: guardados?.empleado ?? empleadoVacio(),
+    periodos: guardados?.periodos ?? [], // lista de { desde, hasta }
+  };
 }
 
 function guardarDatos() {
@@ -80,6 +84,8 @@ function guardarDatos() {
   } catch (error) {
     // Si no se puede guardar, la página sigue funcionando hasta recargar.
   }
+  horaGuardado = new Date().toLocaleTimeString(idioma, { hour: "2-digit", minute: "2-digit" });
+  mostrarEstadoGuardado();
 }
 
 // Copia los datos guardados al formulario.
@@ -151,10 +157,7 @@ function alCambiarFormulario() {
 
   datos.empleado = empleado;
   guardarDatos();
-
-  horaGuardado = new Date().toLocaleTimeString(idioma, { hour: "2-digit", minute: "2-digit" });
-  mostrarEstadoGuardado();
-  mostrarResumen();
+  actualizarPantalla();
 }
 
 // Hora del último guardado. Vacía hasta que el usuario cambia algo.
@@ -176,17 +179,140 @@ function mostrarResumen() {
 
   // Number("") da 0, así que los campos vacíos cuentan como cero.
   const totalDias = Number(empleado.diasVacaciones) + Number(empleado.diasArrastrados);
-  const diasUsados = 0; // se calcula en el paso de períodos de vacaciones
+  const diasUsados = datos.periodos.reduce((suma, periodo) => suma + contarDiasDeVacaciones(periodo), 0);
+  const diasDisponibles = totalDias - diasUsados;
 
   document.getElementById("titulo-resumen").textContent = empleado.nombre
     ? textos.resumenDe.replace("{nombre}", empleado.nombre)
     : textos.resumen;
   document.getElementById("total-dias").textContent = totalDias;
   document.getElementById("dias-usados").textContent = diasUsados;
-  document.getElementById("dias-disponibles").textContent = totalDias - diasUsados;
+  document.getElementById("dias-disponibles").textContent = diasDisponibles;
+
+  // Si se pasó de días, el número se pone en rojo.
+  document.getElementById("indicador-disponibles").classList.toggle("indicador-negativo", diasDisponibles < 0);
+  document.getElementById("nota-sin-periodos").hidden = datos.periodos.length > 0;
+}
+
+// ---------- Fechas ----------
+
+// Convierte "aaaa-mm-dd" en una fecha local (sin zona horaria),
+// para que el día no se corra al cambiar de país.
+function leerFecha(texto) {
+  const [anio, mes, dia] = texto.split("-").map(Number);
+  return new Date(anio, mes - 1, dia);
+}
+
+// Muestra una fecha sin ambigüedad: "3 ago 2026" o "3 Aug 2026".
+function formatearFecha(texto) {
+  return leerFecha(texto).toLocaleDateString(idioma, { day: "numeric", month: "short", year: "numeric" });
+}
+
+// ---------- Períodos de vacaciones ----------
+
+// Cuenta los días de vacaciones de un período, según cómo se cuentan.
+// Laborables: solo los días que trabaja. Naturales: todos los días.
+function contarDiasDeVacaciones(periodo) {
+  const empleado = datos.empleado;
+  const dia = leerFecha(periodo.desde);
+  const fin = leerFecha(periodo.hasta);
+  let cantidad = 0;
+
+  while (dia <= fin) {
+    if (empleado.formaDeContar === "naturales" || empleado.diasLaborables.includes(dia.getDay())) {
+      cantidad++;
+    }
+    dia.setDate(dia.getDate() + 1); // pasar al día siguiente
+  }
+  return cantidad;
+}
+
+// Devuelve la clave del texto de error, o "" si el período se puede agregar.
+function validarPeriodo(periodo) {
+  const { desde, hasta } = periodo;
+  const { anio, inicioContrato, finContrato } = datos.empleado;
+
+  if (!desde || !hasta) return "errorPeriodoIncompleto";
+  if (hasta < desde) return "errorPeriodoOrden";
+  if (!desde.startsWith(anio + "-") || !hasta.startsWith(anio + "-")) return "errorPeriodoFueraDelAnio";
+  if ((inicioContrato && desde < inicioContrato) || (finContrato && hasta > finContrato)) {
+    return "errorPeriodoFueraDelContrato";
+  }
+
+  // Dos períodos se pisan si uno empieza antes de que termine el otro.
+  const sePisa = datos.periodos.some((otro) => desde <= otro.hasta && hasta >= otro.desde);
+  if (sePisa) return "errorPeriodoSolapado";
+
+  return "";
+}
+
+const formPeriodo = document.getElementById("form-periodo");
+let errorPeriodo = "";
+
+function agregarPeriodo(evento) {
+  evento.preventDefault(); // que el formulario no recargue la página
+
+  const periodo = { desde: formPeriodo.desde.value, hasta: formPeriodo.hasta.value };
+  errorPeriodo = validarPeriodo(periodo);
+  mostrarErrorPeriodo();
+  if (errorPeriodo) return;
+
+  datos.periodos.push(periodo);
+  datos.periodos.sort((a, b) => a.desde.localeCompare(b.desde)); // ordenados por fecha
+  guardarDatos();
+  formPeriodo.reset();
+  actualizarPantalla();
+}
+
+function borrarPeriodo(posicion) {
+  datos.periodos.splice(posicion, 1);
+  guardarDatos();
+  actualizarPantalla();
+}
+
+function mostrarErrorPeriodo() {
+  const mensaje = document.getElementById("error-periodo");
+  mensaje.textContent = errorPeriodo ? TEXTOS[idioma][errorPeriodo] : "";
+}
+
+// Arma la lista de períodos cargados, con los días que usa cada uno.
+function mostrarPeriodos() {
+  const textos = TEXTOS[idioma];
+  const lista = document.getElementById("lista-periodos");
+  lista.innerHTML = "";
+
+  datos.periodos.forEach((periodo, posicion) => {
+    const fila = document.createElement("li");
+
+    const fechas = document.createElement("span");
+    fechas.textContent = formatearFecha(periodo.desde) + " → " + formatearFecha(periodo.hasta);
+
+    const dias = document.createElement("span");
+    dias.className = "periodo-dias";
+    dias.textContent = textos.cantidadDias.replace("{n}", contarDiasDeVacaciones(periodo));
+
+    const boton = document.createElement("button");
+    boton.type = "button";
+    boton.className = "boton-borrar";
+    boton.textContent = textos.borrar;
+    boton.addEventListener("click", () => borrarPeriodo(posicion));
+
+    fila.append(fechas, dias, boton);
+    lista.append(fila);
+  });
+
+  mostrarErrorPeriodo();
+}
+
+// Vuelve a dibujar todo lo que depende de los datos.
+function actualizarPantalla() {
+  mostrarResumen();
+  mostrarPeriodos();
 }
 
 // ---------- Arranque ----------
+
+formPeriodo.addEventListener("submit", agregarPeriodo);
 
 document.getElementById("boton-idioma").addEventListener("click", cambiarIdioma);
 formulario.addEventListener("input", alCambiarFormulario);

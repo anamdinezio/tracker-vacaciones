@@ -218,3 +218,71 @@ form > .aclaracion:last-child {
 .indicadores + .aclaracion {
   margin: 12px 0 0;
 }
+
+/* Formulario de una línea para agregar un período. */
+.fila-agregar {
+  align-items: flex-end;
+}
+
+.boton-principal {
+  margin-bottom: 12px;
+  padding: 9px 20px;
+  border: none;
+  border-radius: 6px;
+  background: var(--acento);
+  color: var(--superficie);
+  font: inherit;
+  cursor: pointer;
+}
+
+.boton-principal:hover {
+  opacity: 0.9;
+}
+
+.fila-agregar + .error {
+  margin-top: 0;
+}
+
+/* Lista de períodos cargados. */
+.lista-periodos {
+  margin: 8px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.lista-periodos li {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 10px 0;
+  border-top: 1px solid var(--borde);
+}
+
+.periodo-dias {
+  margin-left: auto;
+  color: var(--texto-suave);
+}
+
+.boton-borrar {
+  padding: 4px 10px;
+  border: 1px solid var(--borde);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--texto-suave);
+  font: inherit;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.boton-borrar:hover {
+  border-color: #b42318;
+  color: #b42318;
+}
+
+/* Cuando se usan más días de los que hay. */
+.indicador-negativo,
+.indicador-negativo .indicador-numero {
+  border-color: #b42318;
+  background: #fdf0ef;
+  color: #b42318;
+}
