@@ -181,6 +181,11 @@ function mostrarResumen() {
     ? textos.resumenDe.replace("{nombre}", empleado.nombre)
     : textos.resumen;
   document.getElementById("total-dias").textContent = totalDias;
+
+  // Si hay días del año anterior, se aclaran entre paréntesis.
+  const arrastrados = Number(empleado.diasArrastrados);
+  document.getElementById("detalle-arrastrados").textContent =
+    arrastrados > 0 ? textos.incluyeArrastrados.replace("{n}", arrastrados) : "";
   document.getElementById("dias-usados").textContent = diasUsados;
   document.getElementById("dias-disponibles").textContent = diasDisponibles;
 

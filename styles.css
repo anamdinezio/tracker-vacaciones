@@ -518,3 +518,9 @@ form > .aclaracion:last-child {
 .plegable:not([open]) summary h2 {
   margin-bottom: 0;
 }
+
+/* Texto chico debajo del nombre del indicador. */
+.indicador-detalle {
+  font-size: 0.8rem;
+  color: var(--texto-aclaracion);
+}
