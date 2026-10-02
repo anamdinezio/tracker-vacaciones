@@ -165,20 +165,13 @@ main {
   font-size: 1.1rem;
 }
 
-/* Número de paso (1, 2, 3, 4) delante del título de la sección. */
+/* Número de paso delante del título de la sección: "1. Datos del empleado". */
 .paso {
-  display: inline-flex;
-  justify-content: center;
-  align-items: center;
-  flex-shrink: 0;
-  width: 24px;
-  height: 24px;
-  margin-right: 10px;
-  border-radius: 50%;
-  background: var(--acento);
-  color: var(--texto-sobre-acento);
-  font-size: 0.8rem;
-  font-weight: 600;
+  margin-right: 6px;
+}
+
+.paso::after {
+  content: ".";
 }
 
 /* Un campo: el texto arriba y la casilla abajo. */
