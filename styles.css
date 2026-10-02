@@ -86,3 +86,98 @@ main {
   font-size: 0.9rem;
   color: var(--texto-aclaracion);
 }
+
+/* Bloques blancos que agrupan cada sección. */
+.tarjeta {
+  margin-top: 24px;
+  padding: 20px;
+  background: var(--superficie);
+  border: 1px solid var(--borde);
+  border-radius: 8px;
+}
+
+.tarjeta h2 {
+  margin: 0 0 16px;
+  font-size: 1.1rem;
+}
+
+/* Un campo: el texto arriba y la casilla abajo. */
+.campo {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 12px;
+  font-size: 0.9rem;
+  color: var(--texto-suave);
+}
+
+.campo input {
+  padding: 8px 10px;
+  border: 1px solid var(--borde);
+  border-radius: 6px;
+  font: inherit;
+  color: var(--texto);
+}
+
+.campo input:focus {
+  outline: 2px solid var(--acento);
+  outline-offset: -1px;
+}
+
+/* Varios campos en la misma línea; en pantallas chicas bajan solos. */
+.fila {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 16px;
+}
+
+.fila .campo {
+  flex: 1 1 180px;
+}
+
+.fila + .aclaracion {
+  margin-top: -4px;
+}
+
+fieldset {
+  margin: 16px 0 0;
+  padding: 0;
+  border: none;
+}
+
+legend {
+  margin-bottom: 8px;
+  font-size: 0.9rem;
+  color: var(--texto-suave);
+}
+
+.opciones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 20px;
+}
+
+.opciones label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+}
+
+.opciones input {
+  accent-color: var(--acento);
+}
+
+/* Errores: en rojo para que se noten. */
+.error {
+  margin: 16px 0 0;
+  color: #b42318;
+}
+
+form > .aclaracion:last-child {
+  margin: 16px 0 0;
+}
+
+.error:empty {
+  display: none;
+}

@@ -15,6 +15,69 @@
   <main>
     <p class="intro" data-i18n="intro"></p>
     <p class="aclaracion" data-i18n="notaPrivacidad"></p>
+
+    <section class="tarjeta">
+      <h2 data-i18n="datosEmpleado"></h2>
+
+      <form id="form-empleado">
+        <label class="campo">
+          <span data-i18n="nombre"></span>
+          <input type="text" name="nombre">
+        </label>
+
+        <div class="fila">
+          <label class="campo">
+            <span data-i18n="anio"></span>
+            <input type="number" name="anio" min="2000" max="2100">
+          </label>
+          <label class="campo">
+            <span data-i18n="inicioContrato"></span>
+            <input type="date" name="inicioContrato">
+          </label>
+          <label class="campo">
+            <span data-i18n="finContrato"></span>
+            <input type="date" name="finContrato">
+          </label>
+        </div>
+        <p class="aclaracion" data-i18n="notaContrato"></p>
+
+        <div class="fila">
+          <label class="campo">
+            <span data-i18n="diasVacaciones"></span>
+            <input type="number" name="diasVacaciones" min="0">
+          </label>
+          <label class="campo">
+            <span data-i18n="diasArrastrados"></span>
+            <input type="number" name="diasArrastrados" min="0">
+          </label>
+        </div>
+
+        <!-- Los valores van del 0 (domingo) al 6 (sábado), como cuenta JavaScript. -->
+        <fieldset>
+          <legend data-i18n="diasQueTrabaja"></legend>
+          <div class="opciones">
+            <label><input type="checkbox" name="diasLaborables" value="1"> <span data-i18n="lunes"></span></label>
+            <label><input type="checkbox" name="diasLaborables" value="2"> <span data-i18n="martes"></span></label>
+            <label><input type="checkbox" name="diasLaborables" value="3"> <span data-i18n="miercoles"></span></label>
+            <label><input type="checkbox" name="diasLaborables" value="4"> <span data-i18n="jueves"></span></label>
+            <label><input type="checkbox" name="diasLaborables" value="5"> <span data-i18n="viernes"></span></label>
+            <label><input type="checkbox" name="diasLaborables" value="6"> <span data-i18n="sabado"></span></label>
+            <label><input type="checkbox" name="diasLaborables" value="0"> <span data-i18n="domingo"></span></label>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend data-i18n="formaDeContar"></legend>
+          <div class="opciones">
+            <label><input type="radio" name="formaDeContar" value="laborables"> <span data-i18n="soloLaborables"></span></label>
+            <label><input type="radio" name="formaDeContar" value="naturales"> <span data-i18n="diasNaturales"></span></label>
+          </div>
+        </fieldset>
+
+        <p id="mensaje-error" class="error"></p>
+        <p class="aclaracion" data-i18n="notaGuardado"></p>
+      </form>
+    </section>
   </main>
 
   <footer class="pie">
