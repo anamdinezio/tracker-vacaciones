@@ -5,11 +5,27 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Gestor de vacaciones</title>
   <link rel="stylesheet" href="styles.css">
+  <script>
+    // Aplica el modo claro u oscuro antes de dibujar la página, para que no parpadee.
+    // Si el usuario no eligió, se usa el del sistema.
+    try {
+      const guardado = localStorage.getItem("tema");
+      const sistemaOscuro = matchMedia("(prefers-color-scheme: dark)").matches;
+      if (guardado === "oscuro" || (!guardado && sistemaOscuro)) {
+        document.documentElement.dataset.tema = "oscuro";
+      }
+    } catch (error) {
+      // Si no se puede leer, queda en claro.
+    }
+  </script>
 </head>
 <body>
   <header class="encabezado">
     <h1 data-i18n="titulo"></h1>
-    <button id="boton-idioma" class="boton-idioma" type="button"></button>
+    <div class="botones-encabezado">
+      <button id="boton-tema" class="boton-idioma boton-tema" type="button"></button>
+      <button id="boton-idioma" class="boton-idioma" type="button"></button>
+    </div>
   </header>
 
   <main>

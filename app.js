@@ -26,6 +26,7 @@ function aplicarIdioma() {
   });
 
   document.getElementById("boton-idioma").textContent = textos.cambiarIdioma;
+  mostrarBotonTema();
   mostrarError();
   mostrarEstadoGuardado();
   actualizarPantalla();
@@ -41,6 +42,43 @@ function cambiarIdioma() {
     // Si no se puede guardar, el cambio funciona igual hasta recargar.
   }
   aplicarIdioma();
+}
+
+// ---------- Modo claro / oscuro ----------
+// El tema inicial se aplica en index.html, antes de dibujar la página.
+
+const ICONO_LUNA =
+  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>';
+const ICONO_SOL =
+  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>';
+
+function temaActual() {
+  return document.documentElement.dataset.tema === "oscuro" ? "oscuro" : "claro";
+}
+
+// El botón muestra el modo al que se pasa: luna si está en claro, sol si está en oscuro.
+function mostrarBotonTema() {
+  const boton = document.getElementById("boton-tema");
+  const textos = TEXTOS[idioma];
+  const oscuro = temaActual() === "oscuro";
+  boton.innerHTML = oscuro ? ICONO_SOL : ICONO_LUNA;
+  boton.title = oscuro ? textos.modoClaro : textos.modoOscuro;
+  boton.setAttribute("aria-label", boton.title);
+}
+
+function cambiarTema() {
+  const nuevo = temaActual() === "oscuro" ? "claro" : "oscuro";
+  if (nuevo === "oscuro") {
+    document.documentElement.dataset.tema = "oscuro";
+  } else {
+    delete document.documentElement.dataset.tema;
+  }
+  try {
+    localStorage.setItem("tema", nuevo);
+  } catch (error) {
+    // Si no se puede guardar, el cambio funciona igual hasta recargar.
+  }
+  mostrarBotonTema();
 }
 
 // ---------- Datos del empleado ----------
@@ -522,6 +560,7 @@ formPeriodo.querySelector(".boton-cancelar").addEventListener("click", cancelarE
 formFestivo.querySelector(".boton-cancelar").addEventListener("click", cancelarEdicionFestivo);
 
 document.getElementById("boton-idioma").addEventListener("click", cambiarIdioma);
+document.getElementById("boton-tema").addEventListener("click", cambiarTema);
 
 // Las secciones plegables recuerdan si quedaron abiertas o cerradas.
 document.querySelectorAll(".plegable").forEach((seccion) => {

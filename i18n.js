@@ -8,6 +8,8 @@ const TEXTOS = {
     notaPrivacidad: "Los datos quedan solo en tu navegador.",
     hechoPor: "Hecho por",
     cambiarIdioma: "English",
+    modoOscuro: "Modo oscuro",
+    modoClaro: "Modo claro",
 
     datosEmpleado: "Datos del empleado",
     nombre: "Nombre",
@@ -101,6 +103,8 @@ const TEXTOS = {
     notaPrivacidad: "Your data stays in your browser.",
     hechoPor: "Made by",
     cambiarIdioma: "Español",
+    modoOscuro: "Dark mode",
+    modoClaro: "Light mode",
 
     datosEmpleado: "Employee details",
     nombre: "Name",

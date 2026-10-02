@@ -1,12 +1,57 @@
-/* Colores provisorios: se cambian todos desde acá. */
+/* Todos los colores se definen acá, una vez para el modo claro y otra para el oscuro. */
 :root {
+  color-scheme: light; /* calendarios y casillas del navegador en claro */
   --fondo: #f7f7f5;
   --superficie: #ffffff;
+  --campo-fondo: #ffffff;
   --texto: #1f2328;
   --texto-suave: #5b616b;
   --texto-aclaracion: #8a9099;
-  --acento: #2f6f62;
   --borde: #dcdcd7;
+  --acento: #2f6f62;
+  --acento-suave: #eef5f3;
+  --texto-sobre-acento: #ffffff;
+  --error: #b42318;
+  --error-suave: #fdf0ef;
+  --alerta: #c4620a;
+  --alerta-suave: #fff4e8;
+  --festivo-fondo: #fde7c2;
+  --festivo-texto: #8a5300;
+  --festivo-suave: #fffaf1;
+  --festivo-borde: #f0dcb4;
+  --festivo-numero: #a8782e;
+  --no-laborable-fondo: #ececea;
+  --no-laborable-texto: #8a9099;
+  --fuera-texto: #c9ccd1;
+}
+
+/* Modo oscuro. Solo en pantalla: al imprimir siempre sale en claro. */
+@media screen {
+  :root[data-tema="oscuro"] {
+    color-scheme: dark;
+    --fondo: #14171a;
+    --superficie: #1d2125;
+    --campo-fondo: #15191c;
+    --texto: #e6e8ea;
+    --texto-suave: #a9b0b8;
+    --texto-aclaracion: #7d858e;
+    --borde: #343a40;
+    --acento: #5fb3a1;
+    --acento-suave: #1f332e;
+    --texto-sobre-acento: #0f1a17;
+    --error: #f0857a;
+    --error-suave: #3a1f1d;
+    --alerta: #f0a35e;
+    --alerta-suave: #3a2a1a;
+    --festivo-fondo: #4a3a1c;
+    --festivo-texto: #f3cf8e;
+    --festivo-suave: #2a2418;
+    --festivo-borde: #5a4826;
+    --festivo-numero: #e2b469;
+    --no-laborable-fondo: #2a2f34;
+    --no-laborable-texto: #8a929b;
+    --fuera-texto: #4a5158;
+  }
 }
 
 * {
@@ -52,7 +97,24 @@ body {
 
 .boton-idioma:hover {
   background: var(--acento);
-  color: var(--superficie);
+  color: var(--texto-sobre-acento);
+}
+
+.botones-encabezado {
+  display: flex;
+  gap: 8px;
+}
+
+/* Botón de modo claro / oscuro: solo un ícono. */
+.boton-tema {
+  display: flex;
+  align-items: center;
+  padding: 6px 10px;
+}
+
+.boton-tema svg {
+  width: 18px;
+  height: 18px;
 }
 
 main {
@@ -116,6 +178,7 @@ main {
   padding: 8px 10px;
   border: 1px solid var(--borde);
   border-radius: 6px;
+  background: var(--campo-fondo);
   font: inherit;
   color: var(--texto);
 }
@@ -172,7 +235,7 @@ legend {
 /* Errores: en rojo para que se noten. */
 .error {
   margin: 16px 0 0;
-  color: #b42318;
+  color: var(--error);
 }
 
 form > .aclaracion:last-child {
@@ -209,7 +272,7 @@ form > .aclaracion:last-child {
 
 .indicador-destacado {
   border-color: var(--acento);
-  background: #eef5f3;
+  background: var(--acento-suave);
 }
 
 .indicador-destacado .indicador-numero {
@@ -231,7 +294,7 @@ form > .aclaracion:last-child {
   border: none;
   border-radius: 6px;
   background: var(--acento);
-  color: var(--superficie);
+  color: var(--texto-sobre-acento);
   font: inherit;
   cursor: pointer;
 }
@@ -282,7 +345,7 @@ form > .aclaracion:last-child {
 
 /* La fila que se está editando queda resaltada. */
 .lista li.fila-editando {
-  background: #eef5f3;
+  background: var(--acento-suave);
 }
 
 .boton-secundario {
@@ -301,24 +364,24 @@ form > .aclaracion:last-child {
 }
 
 .boton-borrar:hover {
-  border-color: #b42318;
-  color: #b42318;
+  border-color: var(--error);
+  color: var(--error);
 }
 
 /* Cuando quedan menos de 5 días. */
 .indicador-alerta,
 .indicador-alerta .indicador-numero {
-  border-color: #c4620a;
-  background: #fff4e8;
-  color: #c4620a;
+  border-color: var(--alerta);
+  background: var(--alerta-suave);
+  color: var(--alerta);
 }
 
 /* Cuando se usan más días de los que hay. */
 .indicador-negativo,
 .indicador-negativo .indicador-numero {
-  border-color: #b42318;
-  background: #fdf0ef;
-  color: #b42318;
+  border-color: var(--error);
+  background: var(--error-suave);
+  color: var(--error);
 }
 
 /* Título de tarjeta con un dato al costado (por ejemplo, la hora de guardado). */
@@ -343,7 +406,7 @@ form > .aclaracion:last-child {
 /* Aviso dentro de una fila de la lista. */
 .lista-aviso {
   font-size: 0.85rem;
-  color: #c4620a;
+  color: var(--alerta);
 }
 
 /* Gráfico de días por mes. */
@@ -399,21 +462,21 @@ form > .aclaracion:last-child {
 /* Colores de los días: se usan en el calendario y en la leyenda. */
 .dia-vacaciones {
   background: var(--acento);
-  color: var(--superficie);
+  color: var(--texto-sobre-acento);
 }
 
 .dia-festivo {
-  background: #fde7c2;
-  color: #8a5300;
+  background: var(--festivo-fondo);
+  color: var(--festivo-texto);
 }
 
 .dia-no-laborable {
-  background: #ececea;
-  color: #8a9099;
+  background: var(--no-laborable-fondo);
+  color: var(--no-laborable-texto);
 }
 
 .dia-fuera {
-  color: #c9ccd1;
+  color: var(--fuera-texto);
 }
 
 .leyenda {
@@ -439,7 +502,7 @@ form > .aclaracion:last-child {
 }
 
 .muestra.dia-fuera {
-  border: 1px dashed #c9ccd1;
+  border: 1px dashed var(--fuera-texto);
 }
 
 /* Calendario anual: los meses se acomodan solos según el ancho. */
@@ -561,17 +624,17 @@ form > .aclaracion:last-child {
   margin: 4px 0 0;
   padding-left: 20px;
   font-size: 0.85rem;
-  color: #b42318;
+  color: var(--error);
 }
 
 /* Festivos laborables: tono suave de festivo (como en el calendario), porque no son vacaciones. */
 .indicador-festivos {
-  border-color: #f0dcb4;
-  background: #fffaf1;
+  border-color: var(--festivo-borde);
+  background: var(--festivo-suave);
 }
 
 .indicador-festivos .indicador-numero {
-  color: #a8782e;
+  color: var(--festivo-numero);
 }
 
 .aclaracion + .aclaracion {
