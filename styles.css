@@ -4,6 +4,7 @@
   --superficie: #ffffff;
   --texto: #1f2328;
   --texto-suave: #5b616b;
+  --texto-aclaracion: #8a9099;
   --acento: #2f6f62;
   --borde: #dcdcd7;
 }
@@ -63,6 +64,7 @@ main {
 }
 
 .intro {
+  margin-bottom: 4px;
   color: var(--texto-suave);
 }
 
@@ -76,4 +78,11 @@ main {
 
 .pie a {
   color: var(--acento);
+}
+
+/* Mensajes y aclaraciones: gris claro, como un comentario. */
+.aclaracion {
+  margin-top: 0;
+  font-size: 0.9rem;
+  color: var(--texto-aclaracion);
 }

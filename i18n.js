@@ -4,13 +4,15 @@
 const TEXTOS = {
   es: {
     titulo: "Gestor de vacaciones",
-    intro: "Registra los días de vacaciones usados y disponibles de un empleado. Los datos quedan solo en tu navegador.",
+    intro: "Registra los días de vacaciones usados y disponibles de un empleado.",
+    notaPrivacidad: "Los datos quedan solo en tu navegador.",
     hechoPor: "Hecho por",
     cambiarIdioma: "English",
   },
   en: {
     titulo: "Vacation tracker",
-    intro: "Track the vacation days an employee has used and has left. Your data stays in your browser.",
+    intro: "Track the vacation days an employee has used and has left.",
+    notaPrivacidad: "Your data stays in your browser.",
     hechoPor: "Made by",
     cambiarIdioma: "Español",
   },
