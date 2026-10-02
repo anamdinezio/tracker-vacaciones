@@ -1,0 +1,79 @@
+/* Colores provisorios: se cambian todos desde acá. */
+:root {
+  --fondo: #f7f7f5;
+  --superficie: #ffffff;
+  --texto: #1f2328;
+  --texto-suave: #5b616b;
+  --acento: #2f6f62;
+  --borde: #dcdcd7;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--fondo);
+  color: var(--texto);
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  line-height: 1.5;
+}
+
+.encabezado {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 24px;
+  background: var(--superficie);
+  border-bottom: 1px solid var(--borde);
+}
+
+.encabezado h1 {
+  margin: 0;
+  font-size: 1.4rem;
+  color: var(--acento);
+}
+
+.boton-idioma {
+  padding: 6px 14px;
+  border: 1px solid var(--acento);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--acento);
+  font: inherit;
+  cursor: pointer;
+}
+
+.boton-idioma:hover {
+  background: var(--acento);
+  color: var(--superficie);
+}
+
+main {
+  flex: 1;
+  width: 100%;
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 24px 16px;
+}
+
+.intro {
+  color: var(--texto-suave);
+}
+
+.pie {
+  padding: 16px;
+  text-align: center;
+  font-size: 0.9rem;
+  color: var(--texto-suave);
+  border-top: 1px solid var(--borde);
+}
+
+.pie a {
+  color: var(--acento);
+}
