@@ -1,4 +1,4 @@
-// Importar festivos desde un archivo CSV o Excel, y descargar la plantilla.
+// Importar festivos desde un archivo CSV o Excel, y descargarlos en Excel.
 // Columnas: la primera es la fecha y la segunda el nombre (opcional).
 // Usa las funciones y los datos de app.js (se llaman cuando la página ya cargó todo).
 
@@ -40,7 +40,7 @@ function dividirLineaCsv(linea, separador) {
 
 // El Excel en español guarda los CSV con ";" y el de inglés con ",".
 function leerCsv(texto) {
-  const lineas = texto.replace(/^﻿/, "").split(/\r?\n/).filter((linea) => linea.trim() !== "");
+  const lineas = texto.replace(/^\uFEFF/, "").split(/\r?\n/).filter((linea) => linea.trim() !== "");
   const separador = lineas.length && lineas[0].includes(";") ? ";" : ",";
   return lineas.map((linea) => dividirLineaCsv(linea, separador));
 }
@@ -128,7 +128,7 @@ async function importarFestivos(archivo) {
     const esExcel = /\.(xlsx|xls)$/i.test(archivo.name);
     filas = esExcel ? await leerExcel(archivo) : leerCsv(await archivo.text());
   } catch (error) {
-    resultadoImportacion = { cargados: 0, errores: [], errorGeneral: "errorImportarArchivo" };
+    resultadoImportacion = { cargados: 0, actualizados: 0, errores: [], errorGeneral: "errorImportarArchivo" };
     mostrarResultadoImportacion();
     return;
   }
@@ -138,6 +138,7 @@ async function importarFestivos(archivo) {
   const orden = ordenDelArchivo(filas.slice(empiezaEn).map((fila) => fila[0] || ""));
 
   let cargados = 0;
+  let actualizados = 0;
   const errores = [];
 
   filas.slice(empiezaEn).forEach((fila, i) => {
@@ -151,9 +152,21 @@ async function importarFestivos(archivo) {
       return;
     }
 
+    const festivo = { fecha, nombre: (fila[1] || "").trim() };
+
+    // Si la fecha ya estaba cargada (por ejemplo, al volver a subir el Excel descargado),
+    // no es un error: se actualiza el nombre si cambió.
+    const existente = datos.festivos.find((otro) => otro.fecha === fecha);
+    if (existente) {
+      if (festivo.nombre && festivo.nombre !== existente.nombre) {
+        existente.nombre = festivo.nombre;
+        actualizados++;
+      }
+      return;
+    }
+
     // Mismas reglas que al cargar un festivo a mano.
     festivoEditando = -1;
-    const festivo = { fecha, nombre: (fila[1] || "").trim() };
     const errorFestivo = validarFestivo(festivo);
     if (errorFestivo) {
       errores.push({ fila: numeroDeFila, clave: errorFestivo, valor: texto });
@@ -165,9 +178,9 @@ async function importarFestivos(archivo) {
   });
 
   datos.festivos.sort((a, b) => a.fecha.localeCompare(b.fecha));
-  if (cargados > 0) guardarDatos();
+  if (cargados > 0 || actualizados > 0) guardarDatos();
 
-  resultadoImportacion = { cargados, errores, errorGeneral: "" };
+  resultadoImportacion = { cargados, actualizados, errores, errorGeneral: "" };
   cancelarEdicionFestivo(); // limpia el formulario y vuelve a dibujar todo
   mostrarResultadoImportacion();
 }
@@ -178,14 +191,17 @@ function mostrarResultadoImportacion() {
   if (!resultadoImportacion) return;
 
   const textos = TEXTOS[idioma];
-  const { cargados, errores, errorGeneral } = resultadoImportacion;
+  const { cargados, actualizados, errores, errorGeneral } = resultadoImportacion;
 
   if (errorGeneral) {
     caja.append(crearElemento("p", "error", textos[errorGeneral]));
     return;
   }
 
-  caja.append(crearElemento("p", "aclaracion", textos.importadosOk.replace("{n}", cargados)));
+  let mensaje = cargados === 1 ? textos.importadosUnoOk : textos.importadosOk.replace("{n}", cargados);
+  if (actualizados === 1) mensaje += " " + textos.importadosUnoActualizado;
+  if (actualizados > 1) mensaje += " " + textos.importadosActualizados.replace("{n}", actualizados);
+  caja.append(crearElemento("p", "aclaracion", mensaje));
 
   if (errores.length) {
     const titulo = errores.length === 1 ? textos.importadosConUnError : textos.importadosConErrores;
@@ -199,26 +215,39 @@ function mostrarResultadoImportacion() {
   }
 }
 
-// ---------- Plantilla ----------
+// ---------- Descargar ----------
 
-// Descarga un CSV con los encabezados y un ejemplo, listo para abrir en Excel.
-function descargarPlantilla() {
+// Descarga un Excel con los festivos cargados, para editarlos y volver a subirlos.
+// Si todavía no hay festivos, trae un ejemplo.
+// Es .xlsx y no CSV porque así no importa si la computadora usa coma o punto y coma.
+async function descargarPlantilla() {
   const textos = TEXTOS[idioma];
   const anio = datos.empleado.anio || new Date().getFullYear();
-  const separador = idioma === "es" ? ";" : ","; // lo que espera Excel en cada idioma
 
-  const lineas = [
-    [textos.fecha, textos.nombreFestivo].join(separador),
-    [anio + "-12-25", textos.ejemploFestivo].join(separador),
-  ];
+  try {
+    await cargarLibreriaExcel();
+  } catch (error) {
+    resultadoImportacion = { cargados: 0, actualizados: 0, errores: [], errorGeneral: "errorLibreriaExcel" };
+    mostrarResultadoImportacion();
+    return;
+  }
 
-  // "﻿" al principio hace que Excel muestre bien los acentos.
-  const archivo = new Blob(["﻿" + lineas.join("\r\n")], { type: "text/csv;charset=utf-8" });
-  const enlace = document.createElement("a");
-  enlace.href = URL.createObjectURL(archivo);
-  enlace.download = textos.nombrePlantilla + ".csv";
-  enlace.click();
-  URL.revokeObjectURL(enlace.href);
+  const festivos = datos.festivos.length
+    ? datos.festivos
+    : [{ fecha: anio + "-12-25", nombre: textos.ejemploFestivo }];
+
+  // Las fechas van como fechas de verdad, así Excel no las confunde con texto.
+  const filas = [[textos.fecha, textos.nombreFestivo]];
+  festivos.forEach((festivo) => filas.push([leerFecha(festivo.fecha), festivo.nombre]));
+
+  const hoja = XLSX.utils.aoa_to_sheet(filas, { cellDates: true });
+  const formato = idioma === "es" ? "dd/mm/yyyy" : "yyyy-mm-dd";
+  for (let fila = 2; fila <= filas.length; fila++) hoja["A" + fila].z = formato;
+  hoja["!cols"] = [{ wch: 14 }, { wch: 30 }]; // ancho de las columnas
+
+  const libro = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(libro, hoja, textos.festivos);
+  XLSX.writeFile(libro, textos.nombrePlantilla + ".xlsx");
 }
 
 // ---------- Botones ----------
