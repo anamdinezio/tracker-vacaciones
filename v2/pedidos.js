@@ -1,6 +1,7 @@
 // Pedidos de vacaciones: cada persona recibe la plantilla en blanco, completa sus datos
 // y se la devuelve al jefe, que sube uno o varios archivos juntos.
-// Plantilla de una persona: nombre y mail arriba, y debajo una fila por período (desde, hasta).
+// Plantilla de una persona: títulos en la fila 1, nombre y mail en la fila 2,
+// y debajo de los títulos "Desde" y "Hasta" una fila por período.
 // También se acepta una fila por período con las cuatro columnas: nombre, mail, desde, hasta.
 // A cada persona se la reconoce por el mail (o por el nombre si no tiene mail).
 // Si no está en el equipo, se agrega.
@@ -57,18 +58,31 @@ function limpiar(celda) {
   return esTextoDeEjemplo(texto) ? "" : texto;
 }
 
-// La plantilla de una persona tiene "Mail" en la segunda fila, primera columna.
-function esPlantillaDePersona(filas) {
-  const etiqueta = String(filas[1]?.[0] ?? "").trim().toLowerCase();
-  return [TEXTOS.es.mail, TEXTOS.en.mail].some((mail) => mail.toLowerCase() === etiqueta);
+// ¿El texto de la celda es igual a ese título en algún idioma? (por ejemplo "Desde" o "From")
+function esTitulo(celda, clave) {
+  const texto = String(celda ?? "").trim().toLowerCase();
+  return [TEXTOS.es[clave], TEXTOS.en[clave]].some((titulo) => titulo.toLowerCase() === texto);
 }
 
-// Nombre en B1, mail en B2, y desde la fila 5 una fila por período (desde en A, hasta en B).
+// En la plantilla de una persona, la fila con el título "Desde" en la primera columna.
+// Devuelve su posición, o -1 si el archivo no tiene esa forma.
+function filaDeTituloDesde(filas) {
+  return filas.findIndex((fila) => esTitulo(fila[0], "desde"));
+}
+
+function esPlantillaDePersona(filas) {
+  return filaDeTituloDesde(filas) > 0;
+}
+
+// Nombre en A2 y mail en B2. Debajo del título "Desde", una fila por período (desde en A, hasta en B).
+// También se entiende la forma con los títulos a la izquierda: "Mail" en A2, nombre en B1 y mail en B2.
 function leerPlantillaDePersona(filas) {
-  const nombre = limpiar(filas[0]?.[1]);
+  const titulosALaIzquierda = esTitulo(filas[1]?.[0], "mail");
+  const nombre = limpiar(titulosALaIzquierda ? filas[0]?.[1] : filas[1]?.[0]);
   const mail = limpiar(filas[1]?.[1]);
-  return filas.slice(4).map((fila, i) => ({
-    numeroDeFila: i + 5, // como se ve en Excel
+  const empiezaEn = filaDeTituloDesde(filas) + 1;
+  return filas.slice(empiezaEn).map((fila, i) => ({
+    numeroDeFila: i + empiezaEn + 1, // como se ve en Excel
     nombre,
     mail,
     textoDesde: limpiar(fila[0]),
@@ -101,6 +115,12 @@ async function cargarArchivoDePedidos(archivo, resultado, nuevas) {
 
   const pedidos = esPlantillaDePersona(filas) ? leerPlantillaDePersona(filas) : leerUnaFilaPorPeriodo(filas);
   const orden = ordenDelArchivo(pedidos.flatMap((pedido) => [pedido.textoDesde, pedido.textoHasta]));
+
+  // Si el archivo no tiene ninguna fila con fechas, se avisa en lugar de no hacer nada.
+  if (!pedidos.some((pedido) => pedido.textoDesde || pedido.textoHasta)) {
+    resultado.errores.push({ archivo: archivo.name, fila: 0, clave: "errorPedidoSinFechas", valor: "" });
+    return;
+  }
 
   pedidos.forEach(({ numeroDeFila, nombre, mail, textoDesde, textoHasta }) => {
     if (!textoDesde && !textoHasta) return; // fila sin fechas
@@ -174,7 +194,7 @@ function mostrarResultadoPedidos() {
   if (nuevas.length) caja.append(crearElemento("p", "aclaracion", textos.completarPersonasNuevas));
 
   if (errores.length) {
-    const titulo = errores.length === 1 ? textos.importadosConUnError : textos.importadosConErrores;
+    const titulo = errores.length === 1 ? textos.pedidosConUnError : textos.pedidosConErrores;
     caja.append(crearElemento("p", "error", titulo.replace("{n}", errores.length)));
     const lista = crearElemento("ul", "lista-errores");
     errores.forEach((error) => {
@@ -202,8 +222,8 @@ async function descargarPlantillaPedidos() {
   }
 
   const filas = [
-    [textos.nombre, textos.nombre],
-    [textos.mail, textos.ejemploMail],
+    [textos.nombre, textos.mail],
+    [textos.nombre, textos.ejemploMail],
     [],
     [textos.desde, textos.hasta],
     [textos.ejemploFecha, textos.ejemploFecha],
