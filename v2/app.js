@@ -294,11 +294,10 @@ function mostrarEquipo() {
 
     const nombre = crearElemento("span", "equipo-nombre", empleado.nombre || textos.sinNombre);
     const mail = crearElemento("span", "equipo-mail", empleado.mail);
-    const disponibles = crearElemento(
-      "span",
-      "lista-detalle",
-      textos.disponiblesCorto.replace("{n}", calcularSaldo(empleado).diasDisponibles)
-    );
+    const saldo = calcularSaldo(empleado);
+    const disponibles = saldo.faltanDias
+      ? crearElemento("span", "lista-detalle lista-aviso", textos.faltanDiasCorto)
+      : crearElemento("span", "lista-detalle", textos.disponiblesCorto.replace("{n}", saldo.diasDisponibles));
 
     fila.append(nombre, mail, disponibles);
     fila.append(crearBotonDeFila(textos.ver, "boton-editar", () => verEmpleado(posicion)));
@@ -387,17 +386,22 @@ function calcularSaldo(empleado) {
     (suma, periodo) => suma + contarDiasDeVacaciones(periodo, empleado),
     0
   );
-  return { calculo, totalDias, diasUsados, diasDisponibles: totalDias - diasUsados };
+  // Sin los días por año (por ejemplo, alguien que entró desde un pedido) no se puede calcular el saldo.
+  const faltanDias = String(empleado.diasVacaciones ?? "").trim() === "";
+  return { calculo, totalDias, diasUsados, diasDisponibles: totalDias - diasUsados, faltanDias };
 }
 
 function mostrarResumen() {
   const textos = TEXTOS[idioma];
   const empleado = empleadoActual();
 
-  const { calculo, totalDias, diasUsados, diasDisponibles } = calcularSaldo(empleado);
+  const { calculo, totalDias, diasUsados, diasDisponibles, faltanDias } = calcularSaldo(empleado);
   mostrarCalculoProporcional(calculo);
 
-  document.getElementById("total-dias").textContent = totalDias;
+  // Si faltan los días por año, el total y los disponibles se muestran como "—", no como negativo.
+  const disponiblesVisibles = faltanDias ? "—" : diasDisponibles;
+  document.getElementById("total-dias").textContent = faltanDias ? "—" : totalDias;
+  document.getElementById("nota-faltan-dias").hidden = !faltanDias;
 
   // Entre paréntesis: si es proporcional y si incluye días del año anterior.
   const arrastrados = Number(empleado.diasArrastrados);
@@ -414,7 +418,7 @@ function mostrarResumen() {
 
   // El mismo saldo, en chico, debajo del formulario de períodos.
   document.getElementById("saldo-periodos").textContent = empleadoActual().periodos.length
-    ? textos.saldoPeriodos.replace("{usados}", diasUsados).replace("{disponibles}", diasDisponibles)
+    ? textos.saldoPeriodos.replace("{usados}", diasUsados).replace("{disponibles}", disponiblesVisibles)
     : "";
 
   // Festivos que caen en un día que trabaja (dentro del contrato): son días libres extra.
@@ -422,13 +426,16 @@ function mostrarResumen() {
     (festivo) => estaDentroDelContrato(festivo.fecha) && trabajaEseDia(leerFecha(festivo.fecha))
   ).length;
   document.getElementById("festivos-laborables").textContent = festivosLaborables;
-  document.getElementById("dias-disponibles").textContent = diasDisponibles;
+  document.getElementById("dias-disponibles").textContent = disponiblesVisibles;
 
   // Menos de 5 días: naranja. Si se pasó de días: rojo.
   // Sin días cargados en el año no se marca nada.
   const indicador = document.getElementById("indicador-disponibles");
-  indicador.classList.toggle("indicador-alerta", totalDias > 0 && diasDisponibles >= 0 && diasDisponibles < 5);
-  indicador.classList.toggle("indicador-negativo", diasDisponibles < 0);
+  indicador.classList.toggle(
+    "indicador-alerta",
+    !faltanDias && totalDias > 0 && diasDisponibles >= 0 && diasDisponibles < 5
+  );
+  indicador.classList.toggle("indicador-negativo", !faltanDias && diasDisponibles < 0);
   document.getElementById("nota-sin-periodos").hidden = empleadoActual().periodos.length > 0;
 }
 
