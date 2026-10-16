@@ -117,6 +117,8 @@ function datosVacios() {
     correo: "gmail", // dónde se abre el mail: gmail, outlook, outlook365 o programa
     mailAsunto: "", // vacío: se usa el texto original del idioma actual
     mailTexto: "",
+    mailAprobacionAsunto: "",
+    mailAprobacionTexto: "",
   };
 }
 
@@ -245,6 +247,7 @@ function alCambiarAnio() {
 // Cambia la persona que se ve en los pasos de abajo.
 function elegirEmpleado(posicion) {
   datos.seleccionado = posicion;
+  ultimaAprobacion = null; // el aviso de aprobación es de la persona anterior
   guardarDatos();
   cancelarEdicionPeriodo();
   mostrarEmpleado();
@@ -690,7 +693,7 @@ function mostrarPeriodos() {
 
     fila.append(fechas, etiqueta, aviso, dias);
     if (estado !== "aprobado") {
-      fila.append(crearBotonDeFila(textos.aprobar, "boton-aprobar", () => cambiarEstado(posicion, "aprobado")));
+      fila.append(crearBotonDeFila(textos.aprobar, "boton-aprobar", () => aprobarPeriodo(posicion)));
     }
     if (estado !== "rechazado") {
       fila.append(crearBotonDeFila(textos.rechazar, "boton-editar", () => cambiarEstado(posicion, "rechazado")));
@@ -810,6 +813,8 @@ function actualizarPantalla() {
   mostrarPeriodos();
   mostrarFestivos();
   mostrarSolapes();
+  mostrarAprobacion();
+  mostrarTextoDeAprobacion();
 }
 
 // ---------- Arranque ----------

@@ -89,12 +89,18 @@ const DIRECCIONES_CORREO = {
   programa: (para, asunto, cuerpo) => `mailto:${para}?subject=${asunto}&body=${cuerpo}`,
 };
 
-function linkDelMail(empleado, periodo, dias) {
-  const para = encodeURIComponent(empleado.mail);
-  const asunto = encodeURIComponent(completarMail(asuntoDelMail(), empleado, periodo, dias));
-  const cuerpo = encodeURIComponent(completarMail(textoDelMail(), empleado, periodo, dias));
+// Arma el link para abrir un mail en el correo elegido. Lo usan el aviso de solape y el de aprobación.
+function armarLinkDeCorreo(mail, asunto, cuerpo) {
   const armar = DIRECCIONES_CORREO[datos.correo] ?? DIRECCIONES_CORREO.gmail;
-  return armar(para, asunto, cuerpo);
+  return armar(encodeURIComponent(mail), encodeURIComponent(asunto), encodeURIComponent(cuerpo));
+}
+
+function linkDelMail(empleado, periodo, dias) {
+  return armarLinkDeCorreo(
+    empleado.mail,
+    completarMail(asuntoDelMail(), empleado, periodo, dias),
+    completarMail(textoDelMail(), empleado, periodo, dias)
+  );
 }
 
 // Botón para avisarle a una de las dos personas. Si no tiene mail, queda la explicación.
@@ -181,6 +187,7 @@ menuCorreo.addEventListener("change", () => {
   datos.correo = menuCorreo.value;
   guardarDatos();
   mostrarSolapes();
+  mostrarAprobacion();
 });
 
 campoAsunto.addEventListener("input", () => {

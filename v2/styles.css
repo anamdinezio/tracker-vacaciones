@@ -394,6 +394,19 @@ legend {
   background: var(--acento);
 }
 
+/* Lo que va dentro de una caja no suma espacio extra arriba ni abajo. */
+.error > :first-child,
+.aviso > :first-child,
+.exito > :first-child {
+  margin-top: 0;
+}
+
+.error > :last-child,
+.aviso > :last-child,
+.exito > :last-child {
+  margin-bottom: 0;
+}
+
 .error[hidden],
 .aviso[hidden] {
   display: none;
@@ -956,6 +969,14 @@ a.boton-chico {
 .periodo-rechazado > span:first-child {
   color: var(--texto-aclaracion);
   text-decoration: line-through;
+}
+
+/* Botones dentro del aviso verde de aprobación. */
+.acciones-aprobacion {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
 }
 
 .boton-aprobar {

@@ -192,6 +192,7 @@
         <p id="error-periodo" class="error"></p>
         <p class="aclaracion" id="saldo-periodos"></p>
 
+        <div id="aviso-aprobacion"></div>
         <ul id="lista-periodos" class="lista"></ul>
       </details>
 
@@ -277,28 +278,45 @@
           <p class="aclaracion" id="nota-sin-solapes" data-i18n="sinSolapes"></p>
           <ul id="lista-solapes" class="lista lista-solapes"></ul>
 
-          <h3 data-i18n="textoDelMail"></h3>
-          <p class="aclaracion" data-i18n="notaMail"></p>
-          <label class="campo campo-correo">
-            <span data-i18n="abrirCon"></span>
-            <select id="mail-correo">
-              <option value="gmail">Gmail</option>
-              <option value="outlook">Outlook.com</option>
-              <option value="outlook365">Outlook (Microsoft 365)</option>
-              <option value="programa" data-i18n="programaCorreo"></option>
-            </select>
-          </label>
-          <label class="campo">
-            <span data-i18n="asunto"></span>
-            <input type="text" id="mail-asunto">
-          </label>
-          <label class="campo">
-            <span data-i18n="mensaje"></span>
-            <textarea id="mail-texto" rows="9"></textarea>
-          </label>
-          <p class="aclaracion" data-i18n="notaDatosMail"></p>
-          <button type="button" class="boton-enlace" id="boton-texto-original" data-i18n="textoOriginal"></button>
         </div>
+      </details>
+
+      <details class="tarjeta plegable" id="seccion-mails" open>
+        <summary><h2><span data-i18n="mails"></span></h2></summary>
+        <p class="descripcion" data-i18n="notaMail"></p>
+        <label class="campo campo-correo">
+          <span data-i18n="abrirCon"></span>
+          <select id="mail-correo">
+            <option value="gmail">Gmail</option>
+            <option value="outlook">Outlook.com</option>
+            <option value="outlook365">Outlook (Microsoft 365)</option>
+            <option value="programa" data-i18n="programaCorreo"></option>
+          </select>
+        </label>
+
+        <h3 data-i18n="mailRechazo"></h3>
+        <label class="campo">
+          <span data-i18n="asunto"></span>
+          <input type="text" id="mail-asunto">
+        </label>
+        <label class="campo">
+          <span data-i18n="mensaje"></span>
+          <textarea id="mail-texto" rows="9"></textarea>
+        </label>
+        <p class="aclaracion" data-i18n="notaDatosMail"></p>
+        <button type="button" class="boton-enlace" id="boton-texto-original" data-i18n="textoOriginal"></button>
+
+        <h3 data-i18n="mailAprobacion"></h3>
+        <label class="campo">
+          <span data-i18n="asunto"></span>
+          <input type="text" id="mail-aprobacion-asunto">
+        </label>
+        <label class="campo">
+          <span data-i18n="mensaje"></span>
+          <textarea id="mail-aprobacion-texto" rows="14"></textarea>
+        </label>
+        <p class="aclaracion" data-i18n="notaDatosAprobacion"></p>
+        <button type="button" class="boton-enlace" id="boton-aprobacion-original" data-i18n="textoOriginal"></button>
       </details>
     </div>
 
@@ -329,6 +347,7 @@
   <script src="respaldo.js?v=5"></script>
   <script src="solapes.js?v=5"></script>
   <script src="pedidos.js?v=5"></script>
+  <script src="aprobacion.js?v=5"></script>
   <script src="pestanias.js?v=5"></script>
   <script src="app.js?v=5"></script>
 </body>
