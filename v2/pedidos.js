@@ -185,24 +185,27 @@ function mostrarResultadoPedidos() {
       if (nuevas.includes(nombre)) texto += " " + textos.personaNueva;
       lista.append(crearElemento("li", "", texto));
     });
-    caja.append(lista);
+    const exito = crearElemento("div", "exito");
+    exito.append(lista);
+    caja.append(exito);
   } else if (!errores.length) {
-    caja.append(crearElemento("p", "aclaracion", textos.pedidosSinCambios));
+    caja.append(crearElemento("p", "aviso", textos.pedidosSinCambios));
   }
 
-  if (repetidos) caja.append(crearElemento("p", "aclaracion", textos.pedidosRepetidos.replace("{n}", repetidos)));
-  if (nuevas.length) caja.append(crearElemento("p", "aclaracion", textos.completarPersonasNuevas));
+  if (repetidos) {
+    const texto = repetidos === 1 ? textos.pedidosRepetidoUno : textos.pedidosRepetidos.replace("{n}", repetidos);
+    caja.append(crearElemento("p", "aclaracion", texto));
+  }
+  if (nuevas.length) caja.append(crearElemento("p", "aviso", textos.completarPersonasNuevas));
 
   if (errores.length) {
     const titulo = errores.length === 1 ? textos.pedidosConUnError : textos.pedidosConErrores;
-    caja.append(crearElemento("p", "error", titulo.replace("{n}", errores.length)));
-    const lista = crearElemento("ul", "lista-errores");
-    errores.forEach((error) => {
+    const detalles = errores.map((error) => {
       const donde = error.fila ? error.archivo + ", " + textos.filaN.replace("{n}", error.fila) : error.archivo;
       const valor = error.valor ? " (" + error.valor + ")" : "";
-      lista.append(crearElemento("li", "", donde + valor + ": " + textos[error.clave]));
+      return donde + valor + ": " + textos[error.clave];
     });
-    caja.append(lista);
+    caja.append(crearCajaDeErrores(titulo.replace("{n}", errores.length), detalles));
   }
 }
 

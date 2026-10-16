@@ -98,7 +98,7 @@ function mostrarResultadoRespaldo() {
   const textos = TEXTOS[idioma];
   const { clave, personas, festivos } = resultadoRespaldo;
   const texto = textos[clave].replace("{personas}", personas).replace("{festivos}", festivos);
-  caja.append(crearElemento("p", clave === "errorRespaldo" ? "error" : "aclaracion", texto));
+  caja.append(crearElemento("p", clave === "errorRespaldo" ? "error" : "exito", texto));
 }
 
 // ---------- Empezar de cero ----------

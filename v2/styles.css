@@ -334,9 +334,69 @@ legend {
 }
 
 /* Errores: en rojo para que se noten. */
+/* Mensajes que tienen que verse: rojo para errores, naranja para avisos, verde para lo que salió bien.
+   Cada uno es una caja con un borde de color a la izquierda y un círculo con un símbolo. */
+.error,
+.aviso,
+.exito {
+  position: relative;
+  margin: 12px 0 0;
+  padding: 10px 12px 10px 42px;
+  border-left: 4px solid;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  color: var(--texto);
+}
+
+.error::before,
+.aviso::before,
+.exito::before {
+  position: absolute;
+  left: 12px;
+  top: 10px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  color: #ffffff;
+  font-size: 0.8rem;
+  font-weight: 700;
+  line-height: 20px;
+  text-align: center;
+}
+
 .error {
-  margin: 16px 0 0;
-  color: var(--error);
+  border-color: var(--error);
+  background: var(--error-suave);
+}
+
+.error::before {
+  content: "!";
+  background: var(--error);
+}
+
+.aviso {
+  border-color: var(--alerta);
+  background: var(--alerta-suave);
+}
+
+.aviso::before {
+  content: "!";
+  background: var(--alerta);
+}
+
+.exito {
+  border-color: var(--acento);
+  background: var(--acento-suave);
+}
+
+.exito::before {
+  content: "\2713"; /* tilde de "listo" */
+  background: var(--acento);
+}
+
+.error[hidden],
+.aviso[hidden] {
+  display: none;
 }
 
 form > .aclaracion:last-child {
@@ -425,9 +485,8 @@ form > .aclaracion:last-child {
 
 /* Resultado de cargar pedidos: una línea por persona. */
 .lista-pedidos {
-  margin: 0 0 8px;
-  padding-left: 20px;
-  font-size: 0.9rem;
+  margin: 0;
+  padding-left: 18px;
 }
 
 /* Lista del equipo: nombre y mail en columnas a la izquierda, días disponibles a la derecha. */
@@ -846,10 +905,28 @@ a.boton-chico {
 }
 
 .lista-errores {
-  margin: 4px 0 0;
-  padding-left: 20px;
+  margin: 6px 0 0;
+  padding-left: 18px;
   font-size: 0.85rem;
+}
+
+/* Lista del equipo: la persona con algo para corregir lleva una marca roja y el problema escrito. */
+#lista-equipo li {
+  padding-left: 12px; /* lugar para la marca roja, igual en todas las filas para que queden alineadas */
+}
+
+#lista-equipo li.fila-con-problemas {
+  box-shadow: inset 4px 0 0 var(--error);
+}
+
+.etiqueta-problema {
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--error-suave);
   color: var(--error);
+  font-size: 0.8rem;
+  font-weight: 600;
+  white-space: nowrap;
 }
 
 /* Festivos laborables: tono suave de festivo (como en el calendario), porque no son vacaciones. */

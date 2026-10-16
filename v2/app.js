@@ -281,6 +281,23 @@ function borrarEmpleado(posicion) {
   elegirEmpleado(datos.seleccionado);
 }
 
+// Lo que una persona tiene para corregir. Devuelve una lista de claves de texto.
+function problemasDe(empleado) {
+  const problemas = [];
+  const saldo = calcularSaldo(empleado);
+  if (!empleado.nombre) problemas.push("problemaSinNombre");
+  if (!empleado.mail) problemas.push("problemaSinMail");
+  const error = validarEmpleado(empleado);
+  if (error === "errorMail") problemas.push("problemaMail");
+  if (error === "errorFechasContrato") problemas.push("problemaContrato");
+  if (saldo.faltanDias) problemas.push("problemaFaltanDias");
+  if (!saldo.faltanDias && saldo.diasDisponibles < 0) problemas.push("problemaSePaso");
+  if (empleado.periodos.some((periodo) => tieneDiasFueraDelContrato(periodo, empleado))) {
+    problemas.push("problemaFueraDelContrato");
+  }
+  return problemas;
+}
+
 // Lista del equipo: nombre, mail y días disponibles de cada persona.
 function mostrarEquipo() {
   const textos = TEXTOS[idioma];
@@ -295,11 +312,21 @@ function mostrarEquipo() {
     const nombre = crearElemento("span", "equipo-nombre", empleado.nombre || textos.sinNombre);
     const mail = crearElemento("span", "equipo-mail", empleado.mail);
     const saldo = calcularSaldo(empleado);
-    const disponibles = saldo.faltanDias
-      ? crearElemento("span", "lista-detalle lista-aviso", textos.faltanDiasCorto)
-      : crearElemento("span", "lista-detalle", textos.disponiblesCorto.replace("{n}", saldo.diasDisponibles));
+    const disponibles = crearElemento(
+      "span",
+      "lista-detalle",
+      saldo.faltanDias ? "" : textos.disponiblesCorto.replace("{n}", saldo.diasDisponibles)
+    );
 
     fila.append(nombre, mail, disponibles);
+
+    // Si tiene algo para corregir, la fila lleva una marca roja y cada problema escrito.
+    const problemas = problemasDe(empleado);
+    fila.classList.toggle("fila-con-problemas", problemas.length > 0);
+    if (problemas.length) {
+      const etiqueta = crearElemento("span", "etiqueta-problema", "! " + problemas.map((clave) => textos[clave]).join(" · "));
+      disponibles.before(etiqueta);
+    }
     fila.append(crearBotonDeFila(textos.ver, "boton-editar", () => verEmpleado(posicion)));
     // Siempre queda al menos una persona.
     if (datos.empleados.length > 1) {
@@ -529,10 +556,10 @@ function contarDiasDeVacaciones(periodo, empleado = empleadoActual()) {
 }
 
 // Pasa si después de cargar el período se cambió el año o el contrato.
-function tieneDiasFueraDelContrato(periodo) {
+function tieneDiasFueraDelContrato(periodo, empleado = empleadoActual()) {
   let fuera = false;
   recorrerPeriodo(periodo, (fecha) => {
-    if (!estaDentroDelContrato(fechaATexto(fecha))) fuera = true;
+    if (!estaDentroDelContrato(fechaATexto(fecha), empleado)) fuera = true;
   });
   return fuera;
 }

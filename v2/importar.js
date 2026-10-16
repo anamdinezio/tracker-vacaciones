@@ -201,18 +201,26 @@ function mostrarResultadoImportacion() {
   let mensaje = cargados === 1 ? textos.importadosUnoOk : textos.importadosOk.replace("{n}", cargados);
   if (actualizados === 1) mensaje += " " + textos.importadosUnoActualizado;
   if (actualizados > 1) mensaje += " " + textos.importadosActualizados.replace("{n}", actualizados);
-  caja.append(crearElemento("p", "aclaracion", mensaje));
+  // Verde si se cargó algo; si no, una nota gris.
+  caja.append(crearElemento("p", cargados + actualizados > 0 ? "exito" : "aclaracion", mensaje));
 
   if (errores.length) {
     const titulo = errores.length === 1 ? textos.importadosConUnError : textos.importadosConErrores;
-    caja.append(crearElemento("p", "error", titulo.replace("{n}", errores.length)));
-    const lista = crearElemento("ul", "lista-errores");
-    errores.forEach((error) => {
-      const detalle = textos.filaN.replace("{n}", error.fila) + " (" + error.valor + "): " + textos[error.clave];
-      lista.append(crearElemento("li", "", detalle));
-    });
-    caja.append(lista);
+    const detalles = errores.map(
+      (error) => textos.filaN.replace("{n}", error.fila) + " (" + error.valor + "): " + textos[error.clave]
+    );
+    caja.append(crearCajaDeErrores(titulo.replace("{n}", errores.length), detalles));
   }
+}
+
+// Caja roja con un título y la lista de lo que no se pudo cargar.
+function crearCajaDeErrores(titulo, detalles) {
+  const caja = crearElemento("div", "error");
+  caja.append(crearElemento("strong", "", titulo));
+  const lista = crearElemento("ul", "lista-errores");
+  detalles.forEach((detalle) => lista.append(crearElemento("li", "", detalle)));
+  caja.append(lista);
+  return caja;
 }
 
 // ---------- Descargar ----------

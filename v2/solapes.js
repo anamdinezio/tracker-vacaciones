@@ -94,7 +94,7 @@ function crearBotonAvisar(empleado, periodo, dias) {
   const textos = TEXTOS[idioma];
   const nombre = empleado.nombre || textos.sinNombre;
   if (!empleado.mail) {
-    return crearElemento("span", "aclaracion", textos.faltaMail.replace("{nombre}", nombre));
+    return crearElemento("span", "etiqueta-problema", textos.faltaMail.replace("{nombre}", nombre));
   }
   const enlace = crearElemento("a", "boton-chico boton-editar", textos.avisarA.replace("{nombre}", nombre));
   enlace.href = linkDelMail(empleado, periodo, dias);
