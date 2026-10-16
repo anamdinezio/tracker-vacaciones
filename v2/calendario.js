@@ -1,7 +1,32 @@
 // Calendario anual con colores y gráfico de días de vacaciones por mes.
 // Usa las funciones y los datos de app.js (se llaman cuando la página ya cargó todo).
 
-// Qué tipo de día es, para elegir el color en el calendario.
+// El calendario se puede ver para todo el equipo o solo para la persona elegida.
+function vistaDeEquipo() {
+  return datos.vistaCalendario !== "persona";
+}
+
+// Nombres de las personas que tienen ese día de vacaciones (solo los días que se descuentan).
+function quienesEstanDeVacaciones(fecha) {
+  const texto = fechaATexto(fecha);
+  return datos.empleados
+    .filter((empleado) =>
+      empleado.periodos.some((periodo) => texto >= periodo.desde && texto <= periodo.hasta) &&
+      cuentaComoVacaciones(fecha, empleado)
+    )
+    .map((empleado) => empleado.nombre || TEXTOS[idioma].sinNombre);
+}
+
+// Vista del equipo: vacaciones si hay una persona, solape si hay dos o más.
+function tipoDeDiaEquipo(fecha) {
+  const cantidad = quienesEstanDeVacaciones(fecha).length;
+  if (cantidad >= 2) return "solape";
+  if (cantidad === 1) return "vacaciones";
+  if (esFestivo(fechaATexto(fecha))) return "festivo";
+  return "laborable";
+}
+
+// Vista de una persona: qué tipo de día es, para elegir el color en el calendario.
 function tipoDeDia(fecha) {
   const texto = fechaATexto(fecha);
   if (!estaDentroDelContrato(texto)) return "fuera";
@@ -76,10 +101,22 @@ function mostrarCalendario() {
   contenedor.innerHTML = "";
   const titulo = document.getElementById("titulo-calendario");
   titulo.textContent = textos.calendario.replace("{anio}", anio || "");
-  // En la hoja impresa el título lleva también el nombre del empleado.
-  if (empleadoActual().nombre) {
-    titulo.append(crearElemento("span", "solo-impresion", " · " + empleadoActual().nombre));
+  const equipo = vistaDeEquipo();
+  // En la hoja impresa el título lleva también el nombre de la persona, o "Todo el equipo".
+  const nombreImpreso = equipo ? textos.todoElEquipo : empleadoActual().nombre;
+  if (nombreImpreso) {
+    titulo.append(crearElemento("span", "solo-impresion", " · " + nombreImpreso));
   }
+
+  // Opciones de vista y leyenda: algunas solo tienen sentido en una de las dos vistas.
+  document.querySelector(`[name=vistaCalendario][value=${equipo ? "equipo" : "persona"}]`).checked = true;
+  document.getElementById("vista-persona").textContent = textos.soloPersona.replace(
+    "{nombre}",
+    empleadoActual().nombre || textos.sinNombre
+  );
+  document.querySelectorAll(".solo-vista-equipo").forEach((elemento) => (elemento.hidden = !equipo));
+  document.querySelectorAll(".solo-vista-persona").forEach((elemento) => (elemento.hidden = equipo));
+
   if (!anio) return; // sin año no hay calendario
 
   const porMes = diasDeVacacionesPorMes();
@@ -88,7 +125,8 @@ function mostrarCalendario() {
 
   for (let mes = 0; mes < 12; mes++) {
     const titulo = crearElemento("div", "mes-titulo");
-    const cantidad = porMes[mes] ? textos.cantidadDias.replace("{n}", porMes[mes]) : "";
+    // Los días por mes son de la persona elegida: en la vista del equipo no se muestran.
+    const cantidad = !equipo && porMes[mes] ? textos.cantidadDias.replace("{n}", porMes[mes]) : "";
     titulo.append(crearElemento("span", "", nombreDelMes(mes, "long")), crearElemento("span", "mes-cantidad", cantidad));
 
     const grilla = crearElemento("div", "mes-grilla");
@@ -101,12 +139,16 @@ function mostrarCalendario() {
     const dia = new Date(anio, mes, 1);
     while (dia.getMonth() === mes) {
       const texto = fechaATexto(dia);
-      const celda = crearElemento("span", "dia dia-" + tipoDeDia(dia), dia.getDate());
+      const tipo = equipo ? tipoDeDiaEquipo(dia) : tipoDeDia(dia);
+      const celda = crearElemento("span", "dia dia-" + tipo, dia.getDate());
       if (texto === hoy) celda.classList.add("dia-hoy");
 
-      // Al pasar el mouse por un festivo se ve su nombre.
+      // Al pasar el mouse se ve el nombre del festivo y, en la vista del equipo, quiénes están de vacaciones.
       const festivo = datos.festivos.find((f) => f.fecha === texto);
-      if (festivo && festivo.nombre) celda.title = festivo.nombre;
+      const nombres = [];
+      if (festivo && festivo.nombre) nombres.push(festivo.nombre);
+      if (equipo) nombres.push(...quienesEstanDeVacaciones(dia));
+      if (nombres.length) celda.title = nombres.join(", ");
 
       grilla.append(celda);
       dia.setDate(dia.getDate() + 1);
@@ -135,3 +177,11 @@ window.addEventListener("afterprint", () => {
 });
 
 document.getElementById("boton-imprimir").addEventListener("click", () => window.print());
+
+document.querySelectorAll("[name=vistaCalendario]").forEach((opcion) => {
+  opcion.addEventListener("change", () => {
+    datos.vistaCalendario = opcion.value;
+    guardarDatos();
+    mostrarCalendario();
+  });
+});

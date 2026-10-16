@@ -23,6 +23,8 @@
   --no-laborable-fondo: #ececea;
   --no-laborable-texto: #8a9099;
   --fuera-texto: #c9ccd1;
+  --solape-fondo: #c2412d;
+  --solape-texto: #ffffff;
 }
 
 /* Modo oscuro. Solo en pantalla: al imprimir siempre sale en claro. */
@@ -51,6 +53,8 @@
     --no-laborable-fondo: #2a2f34;
     --no-laborable-texto: #8a929b;
     --fuera-texto: #4a5158;
+    --solape-fondo: #e8806c;
+    --solape-texto: #1f0f0b;
   }
 }
 
@@ -484,6 +488,11 @@ form > .aclaracion:last-child {
   color: var(--texto-sobre-acento);
 }
 
+.dia-solape {
+  background: var(--solape-fondo);
+  color: var(--solape-texto);
+}
+
 .dia-festivo {
   background: var(--festivo-fondo);
   color: var(--festivo-texto);
@@ -496,6 +505,10 @@ form > .aclaracion:last-child {
 
 .dia-fuera {
   color: var(--fuera-texto);
+}
+
+.vista-calendario {
+  margin-bottom: 12px;
 }
 
 .leyenda {
@@ -511,6 +524,10 @@ form > .aclaracion:last-child {
   display: flex;
   align-items: center;
   gap: 6px;
+}
+
+.leyenda > span[hidden] {
+  display: none;
 }
 
 .muestra {

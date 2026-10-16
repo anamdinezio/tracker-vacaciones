@@ -198,11 +198,16 @@
 
     <details class="tarjeta plegable" id="seccion-calendario" open>
       <summary><h2 id="titulo-calendario"></h2></summary>
+      <div class="opciones vista-calendario no-imprimir">
+        <label><input type="radio" name="vistaCalendario" value="equipo"> <span data-i18n="todoElEquipo"></span></label>
+        <label><input type="radio" name="vistaCalendario" value="persona"> <span id="vista-persona"></span></label>
+      </div>
       <div class="leyenda">
         <span><i class="muestra dia-vacaciones"></i> <span data-i18n="leyendaVacaciones"></span></span>
+        <span class="solo-vista-equipo"><i class="muestra dia-solape"></i> <span data-i18n="leyendaSolape"></span></span>
         <span><i class="muestra dia-festivo"></i> <span data-i18n="leyendaFestivo"></span></span>
-        <span><i class="muestra dia-no-laborable"></i> <span data-i18n="leyendaNoLaborable"></span></span>
-        <span><i class="muestra dia-fuera"></i> <span data-i18n="leyendaFuera"></span></span>
+        <span class="solo-vista-persona"><i class="muestra dia-no-laborable"></i> <span data-i18n="leyendaNoLaborable"></span></span>
+        <span class="solo-vista-persona"><i class="muestra dia-fuera"></i> <span data-i18n="leyendaFuera"></span></span>
         <button type="button" class="boton-enlace no-imprimir" id="boton-imprimir" data-i18n="imprimirCalendario"></button>
       </div>
       <div id="calendario" class="calendario"></div>
