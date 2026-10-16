@@ -10,19 +10,13 @@ let resultadoRespaldo = null;
 function descargarRespaldo() {
   const contenido = {
     app: MARCA_RESPALDO,
-    version: 1,
+    version: 2,
     fecha: fechaATexto(new Date()),
     datos: datos,
   };
 
-  // Nombre del archivo: respaldo-vacaciones-ana-di-nezio-2026-10-02.json
-  const nombre = datos.empleado.nombre
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/[̀-ͯ]/g, "") // saca los acentos
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-|-$/g, "");
-  const partes = [TEXTOS[idioma].nombreRespaldo, nombre, contenido.fecha].filter(Boolean);
+  // Nombre del archivo: respaldo-vacaciones-equipo-2026-10-16.json
+  const partes = [TEXTOS[idioma].nombreRespaldo, contenido.fecha];
 
   const archivo = new Blob([JSON.stringify(contenido, null, 2)], { type: "application/json" });
   const enlace = document.createElement("a");
@@ -34,18 +28,28 @@ function descargarRespaldo() {
 
 // Revisa que lo que vino en el archivo tenga la forma esperada.
 // Devuelve los datos listos para usar, o null si el archivo no sirve.
+// Acepta también los respaldos de la v1 (un solo empleado).
 function revisarRespaldo(contenido) {
   if (!contenido || contenido.app !== MARCA_RESPALDO || !contenido.datos) return null;
-  const { empleado, periodos, festivos } = contenido.datos;
-  if (!empleado || typeof empleado !== "object") return null;
+  let nuevos = contenido.datos;
+  if (nuevos.empleado && typeof nuevos.empleado === "object") nuevos = convertirDesdeV1(nuevos);
+  if (!Array.isArray(nuevos.empleados) || nuevos.empleados.length === 0) return null;
 
   const esFecha = (texto) => typeof texto === "string" && /^\d{4}-\d{2}-\d{2}$/.test(texto);
+  const soloPeriodosValidos = (periodos) =>
+    (Array.isArray(periodos) ? periodos : []).filter((p) => esFecha(p.desde) && esFecha(p.hasta));
 
   return {
     // Lo que falte en el archivo se completa con los valores de inicio.
-    empleado: { ...empleadoVacio(), ...empleado },
-    periodos: (Array.isArray(periodos) ? periodos : []).filter((p) => esFecha(p.desde) && esFecha(p.hasta)),
-    festivos: (Array.isArray(festivos) ? festivos : [])
+    ...datosVacios(),
+    ...nuevos,
+    seleccionado: 0,
+    empleados: nuevos.empleados.map((empleado) => ({
+      ...empleadoVacio(),
+      ...empleado,
+      periodos: soloPeriodosValidos(empleado.periodos),
+    })),
+    festivos: (Array.isArray(nuevos.festivos) ? nuevos.festivos : [])
       .filter((f) => esFecha(f.fecha))
       .map((f) => ({ fecha: f.fecha, nombre: String(f.nombre || "") })),
   };
@@ -74,13 +78,13 @@ async function cargarRespaldo(archivo) {
   cancelarEdicionPeriodo();
   cancelarEdicionFestivo();
   mostrarEmpleado();
-  errorActual = validarEmpleado(datos.empleado);
+  errorActual = validarEmpleado(empleadoActual());
   mostrarError();
   actualizarPantalla();
 
   resultadoRespaldo = {
     clave: "respaldoCargado",
-    periodos: datos.periodos.length,
+    personas: datos.empleados.length,
     festivos: datos.festivos.length,
   };
   mostrarResultadoRespaldo();
@@ -92,8 +96,8 @@ function mostrarResultadoRespaldo() {
   if (!resultadoRespaldo) return;
 
   const textos = TEXTOS[idioma];
-  const { clave, periodos, festivos } = resultadoRespaldo;
-  const texto = textos[clave].replace("{periodos}", periodos).replace("{festivos}", festivos);
+  const { clave, personas, festivos } = resultadoRespaldo;
+  const texto = textos[clave].replace("{personas}", personas).replace("{festivos}", festivos);
   caja.append(crearElemento("p", clave === "errorRespaldo" ? "error" : "aclaracion", texto));
 }
 
@@ -103,7 +107,7 @@ function mostrarResultadoRespaldo() {
 function borrarTodo() {
   if (!confirm(TEXTOS[idioma].confirmarBorrarTodo)) return;
 
-  datos = { empleado: empleadoVacio(), periodos: [], festivos: [] };
+  datos = datosVacios();
   guardarDatos();
   cancelarEdicionPeriodo();
   cancelarEdicionFestivo();
@@ -118,7 +122,7 @@ function borrarTodo() {
   mostrarResultadoRespaldo();
 
   // Volver al paso 1, abierto.
-  const seccionEmpleado = document.getElementById("seccion-empleado");
+  const seccionEmpleado = document.getElementById("seccion-equipo");
   seccionEmpleado.open = true;
   seccionEmpleado.scrollIntoView({ behavior: "smooth" });
 }

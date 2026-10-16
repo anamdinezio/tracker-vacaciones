@@ -200,6 +200,11 @@ main {
   outline-offset: -1px;
 }
 
+/* El año es un número corto: no hace falta todo el ancho. */
+.campo-anio {
+  max-width: 160px;
+}
+
 /* Varios campos en la misma línea; en pantallas chicas bajan solos. */
 .fila {
   display: flex;

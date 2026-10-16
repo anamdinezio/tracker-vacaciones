@@ -222,7 +222,7 @@ function mostrarResultadoImportacion() {
 // Es .xlsx y no CSV porque así no importa si la computadora usa coma o punto y coma.
 async function descargarPlantilla() {
   const textos = TEXTOS[idioma];
-  const anio = datos.empleado.anio || new Date().getFullYear();
+  const anio = datos.anio || new Date().getFullYear();
 
   try {
     await cargarLibreriaExcel();

@@ -6,7 +6,7 @@ function tipoDeDia(fecha) {
   const texto = fechaATexto(fecha);
   if (!estaDentroDelContrato(texto)) return "fuera";
 
-  const enVacaciones = datos.periodos.some((periodo) => texto >= periodo.desde && texto <= periodo.hasta);
+  const enVacaciones = empleadoActual().periodos.some((periodo) => texto >= periodo.desde && texto <= periodo.hasta);
   if (enVacaciones && cuentaComoVacaciones(fecha)) return "vacaciones";
   if (esFestivo(texto)) return "festivo";
   if (!trabajaEseDia(fecha)) return "no-laborable";
@@ -32,7 +32,7 @@ function inicialesDeLaSemana() {
 // Lista de 12 números: cuántos días de vacaciones se usan cada mes.
 function diasDeVacacionesPorMes() {
   const porMes = new Array(12).fill(0);
-  datos.periodos.forEach((periodo) => {
+  empleadoActual().periodos.forEach((periodo) => {
     recorrerPeriodo(periodo, (fecha) => {
       if (cuentaComoVacaciones(fecha)) porMes[fecha.getMonth()]++;
     });
@@ -54,7 +54,7 @@ function mostrarDiasPorMes() {
   const maximo = Math.max(...porMes, 1);
   const grafico = document.getElementById("dias-por-mes");
   grafico.innerHTML = "";
-  document.getElementById("bloque-dias-por-mes").hidden = datos.periodos.length === 0;
+  document.getElementById("bloque-dias-por-mes").hidden = empleadoActual().periodos.length === 0;
 
   porMes.forEach((cantidad, mes) => {
     const columna = crearElemento("div", "columna-mes");
@@ -71,14 +71,14 @@ function mostrarDiasPorMes() {
 // Los 12 meses del año, con cada día pintado según su tipo.
 function mostrarCalendario() {
   const textos = TEXTOS[idioma];
-  const anio = datos.empleado.anio;
+  const anio = datos.anio;
   const contenedor = document.getElementById("calendario");
   contenedor.innerHTML = "";
   const titulo = document.getElementById("titulo-calendario");
   titulo.textContent = textos.calendario.replace("{anio}", anio || "");
   // En la hoja impresa el título lleva también el nombre del empleado.
-  if (datos.empleado.nombre) {
-    titulo.append(crearElemento("span", "solo-impresion", " · " + datos.empleado.nombre));
+  if (empleadoActual().nombre) {
+    titulo.append(crearElemento("span", "solo-impresion", " · " + empleadoActual().nombre));
   }
   if (!anio) return; // sin año no hay calendario
 

@@ -81,41 +81,68 @@ function cambiarTema() {
   mostrarBotonTema();
 }
 
-// ---------- Datos del empleado ----------
+// ---------- Datos del equipo ----------
 
 const CLAVE_DATOS = "gestorVacacionesV2"; // distinta de la v1, para no pisar sus datos
+const CLAVE_DATOS_V1 = "gestorVacaciones";
 const formulario = document.getElementById("form-empleado");
 
-// Valores con los que arranca alguien que entra por primera vez.
+// Valores con los que arranca cada persona nueva.
 function empleadoVacio() {
   return {
     nombre: "",
-    anio: new Date().getFullYear(),
+    mail: "",
     inicioContrato: "",
     finContrato: "",
     diasVacaciones: "",
     diasArrastrados: "",
     diasLaborables: [1, 2, 3, 4, 5], // de lunes a viernes
     formaDeContar: "laborables",
+    periodos: [], // lista de { desde, hasta }
   };
 }
 
 // Todo lo que guarda la app vive en un solo objeto.
+// El año y los festivos son de todo el equipo. El resto es de cada persona.
+function datosVacios() {
+  return {
+    anio: new Date().getFullYear(),
+    festivos: [], // lista de { fecha, nombre }
+    empleados: [empleadoVacio()],
+    seleccionado: 0, // posición de la persona que se está viendo
+  };
+}
+
+// Pasa los datos de la v1 (un solo empleado) al formato de la v2.
+function convertirDesdeV1(v1) {
+  const { anio, ...empleado } = v1.empleado;
+  return {
+    ...datosVacios(),
+    anio: anio || new Date().getFullYear(),
+    festivos: v1.festivos ?? [],
+    empleados: [{ ...empleadoVacio(), ...empleado, periodos: v1.periodos ?? [] }],
+  };
+}
+
 let datos = cargarDatos();
 
+// Si es la primera vez que se abre la v2 y hay datos de la v1, se arranca con esos.
 function cargarDatos() {
-  let guardados = null;
   try {
     const texto = localStorage.getItem(CLAVE_DATOS);
-    if (texto) guardados = JSON.parse(texto);
+    if (texto) return { ...datosVacios(), ...JSON.parse(texto) };
+
+    const textoV1 = localStorage.getItem(CLAVE_DATOS_V1);
+    if (textoV1) return convertirDesdeV1(JSON.parse(textoV1));
   } catch (error) {
     // Si no se puede leer, arrancamos de cero.
   }
-  return {
-    empleado: guardados?.empleado ?? empleadoVacio(),
-    periodos: guardados?.periodos ?? [], // lista de { desde, hasta }
-    festivos: guardados?.festivos ?? [], // lista de { fecha, nombre }
-  };
+  return datosVacios();
+}
+
+// La persona que se está viendo y editando.
+function empleadoActual() {
+  return datos.empleados[datos.seleccionado];
 }
 
 function guardarDatos() {
@@ -130,9 +157,9 @@ function guardarDatos() {
 
 // Copia los datos guardados al formulario.
 function mostrarEmpleado() {
-  const empleado = datos.empleado;
+  const empleado = empleadoActual();
   formulario.nombre.value = empleado.nombre;
-  formulario.anio.value = empleado.anio;
+  formulario.mail.value = empleado.mail;
   formulario.inicioContrato.value = empleado.inicioContrato;
   formulario.finContrato.value = empleado.finContrato;
   formulario.diasVacaciones.value = empleado.diasVacaciones;
@@ -154,7 +181,7 @@ function leerEmpleado() {
 
   return {
     nombre: formulario.nombre.value.trim(),
-    anio: Number(formulario.anio.value),
+    mail: formulario.mail.value.trim(),
     inicioContrato: formulario.inicioContrato.value,
     finContrato: formulario.finContrato.value,
     diasVacaciones: formulario.diasVacaciones.value,
@@ -167,11 +194,13 @@ function leerEmpleado() {
 // Devuelve la clave del texto de error, o "" si está todo bien.
 // Las fechas vienen como "aaaa-mm-dd", así que se pueden comparar como texto.
 function validarEmpleado(empleado) {
-  const { inicioContrato, finContrato } = empleado;
+  const { inicioContrato, finContrato, mail } = empleado;
 
   if (inicioContrato && finContrato && finContrato < inicioContrato) {
     return "errorFechasContrato";
   }
+  // Un control simple: algo, una @, algo, un punto y algo.
+  if (mail && !/^\S+@\S+\.\S+$/.test(mail)) return "errorMail";
 
   return "";
 }
@@ -190,9 +219,89 @@ function alCambiarFormulario() {
   errorActual = validarEmpleado(empleado);
   mostrarError();
 
-  datos.empleado = empleado;
+  // Los períodos no están en el formulario: se conservan los que ya tenía.
+  datos.empleados[datos.seleccionado] = { ...empleado, periodos: empleadoActual().periodos };
   guardarDatos();
   actualizarPantalla();
+}
+
+// ---------- Equipo ----------
+
+const campoAnio = document.getElementById("campo-anio");
+
+function alCambiarAnio() {
+  datos.anio = Number(campoAnio.value);
+  guardarDatos();
+  actualizarPantalla();
+}
+
+// Cambia la persona que se ve en los pasos de abajo.
+function elegirEmpleado(posicion) {
+  datos.seleccionado = posicion;
+  guardarDatos();
+  cancelarEdicionPeriodo();
+  mostrarEmpleado();
+  errorActual = validarEmpleado(empleadoActual());
+  mostrarError();
+  actualizarPantalla();
+}
+
+function agregarEmpleado() {
+  datos.empleados.push(empleadoVacio());
+  elegirEmpleado(datos.empleados.length - 1);
+
+  // Abre los datos de la persona nueva para completarlos.
+  const seccion = document.getElementById("seccion-empleado");
+  seccion.open = true;
+  seccion.scrollIntoView({ behavior: "smooth" });
+  formulario.nombre.focus({ preventScroll: true });
+}
+
+function borrarEmpleado(posicion) {
+  const textos = TEXTOS[idioma];
+  const nombre = datos.empleados[posicion].nombre || textos.sinNombre;
+  if (!confirm(textos.confirmarBorrarEmpleado.replace("{nombre}", nombre))) return;
+
+  datos.empleados.splice(posicion, 1);
+  // Si se borró a la persona elegida o a alguien de arriba, la elegida se corre un lugar.
+  if (datos.seleccionado >= posicion) datos.seleccionado = Math.max(0, datos.seleccionado - 1);
+  elegirEmpleado(datos.seleccionado);
+}
+
+// Lista del equipo: nombre, mail y días disponibles de cada persona.
+function mostrarEquipo() {
+  const textos = TEXTOS[idioma];
+  campoAnio.value = datos.anio || "";
+  const lista = document.getElementById("lista-equipo");
+  lista.innerHTML = "";
+
+  datos.empleados.forEach((empleado, posicion) => {
+    const fila = document.createElement("li");
+    fila.classList.toggle("fila-editando", posicion === datos.seleccionado);
+
+    const nombre = crearElemento("span", "", empleado.nombre || textos.sinNombre);
+    const mail = crearElemento("span", "lista-detalle", empleado.mail);
+    const disponibles = crearElemento(
+      "span",
+      "lista-detalle",
+      textos.disponiblesCorto.replace("{n}", calcularSaldo(empleado).diasDisponibles)
+    );
+
+    fila.append(nombre, mail, disponibles);
+    if (posicion !== datos.seleccionado) {
+      fila.append(crearBotonDeFila(textos.ver, "boton-editar", () => elegirEmpleado(posicion)));
+    }
+    // Siempre queda al menos una persona.
+    if (datos.empleados.length > 1) {
+      fila.append(crearBotonDeFila(textos.borrar, "boton-borrar", () => borrarEmpleado(posicion)));
+    }
+    lista.append(fila);
+  });
+
+  // Los pasos de abajo llevan el nombre de la persona elegida.
+  const nombre = empleadoActual().nombre || textos.sinNombre;
+  document.getElementById("titulo-datos-empleado").textContent = textos.datosDe.replace("{nombre}", nombre);
+  document.getElementById("titulo-periodos").textContent = textos.periodosDe.replace("{nombre}", nombre);
 }
 
 // Hora del último guardado. Vacía hasta que el usuario cambia algo.
@@ -211,8 +320,9 @@ function mostrarEstadoGuardado() {
 // Días de vacaciones que le tocan en el año elegido.
 // Si el contrato no cubre el año entero, se calcula la parte proporcional:
 // días por año completo × días de contrato en el año / días del año, redondeado al más cercano.
-function calcularDiasDelAnio() {
-  const { anio, inicioContrato, finContrato, diasVacaciones } = datos.empleado;
+function calcularDiasDelAnio(empleado = empleadoActual()) {
+  const { inicioContrato, finContrato, diasVacaciones } = empleado;
+  const anio = datos.anio;
   const completo = Number(diasVacaciones); // Number("") da 0
   const inicioAnio = anio + "-01-01";
   const finAnio = anio + "-12-31";
@@ -253,15 +363,23 @@ function mostrarCalculoProporcional(calculo) {
     .replace("{dias}", calculo.dias);
 }
 
+// Total, usados y disponibles de una persona.
+function calcularSaldo(empleado) {
+  const calculo = calcularDiasDelAnio(empleado);
+  const totalDias = calculo.dias + Number(empleado.diasArrastrados);
+  const diasUsados = empleado.periodos.reduce(
+    (suma, periodo) => suma + contarDiasDeVacaciones(periodo, empleado),
+    0
+  );
+  return { calculo, totalDias, diasUsados, diasDisponibles: totalDias - diasUsados };
+}
+
 function mostrarResumen() {
   const textos = TEXTOS[idioma];
-  const empleado = datos.empleado;
+  const empleado = empleadoActual();
 
-  const calculo = calcularDiasDelAnio();
+  const { calculo, totalDias, diasUsados, diasDisponibles } = calcularSaldo(empleado);
   mostrarCalculoProporcional(calculo);
-  const totalDias = calculo.dias + Number(empleado.diasArrastrados);
-  const diasUsados = datos.periodos.reduce((suma, periodo) => suma + contarDiasDeVacaciones(periodo), 0);
-  const diasDisponibles = totalDias - diasUsados;
 
   document.getElementById("titulo-resumen").textContent = empleado.nombre
     ? textos.resumenDe.replace("{nombre}", empleado.nombre)
@@ -282,7 +400,7 @@ function mostrarResumen() {
   document.getElementById("dias-usados").textContent = diasUsados;
 
   // El mismo saldo, en chico, debajo del formulario de períodos.
-  document.getElementById("saldo-periodos").textContent = datos.periodos.length
+  document.getElementById("saldo-periodos").textContent = empleadoActual().periodos.length
     ? textos.saldoPeriodos.replace("{usados}", diasUsados).replace("{disponibles}", diasDisponibles)
     : "";
 
@@ -298,7 +416,7 @@ function mostrarResumen() {
   const indicador = document.getElementById("indicador-disponibles");
   indicador.classList.toggle("indicador-alerta", totalDias > 0 && diasDisponibles >= 0 && diasDisponibles < 5);
   indicador.classList.toggle("indicador-negativo", diasDisponibles < 0);
-  document.getElementById("nota-sin-periodos").hidden = datos.periodos.length > 0;
+  document.getElementById("nota-sin-periodos").hidden = empleadoActual().periodos.length > 0;
 }
 
 // ---------- Fechas ----------
@@ -344,9 +462,10 @@ function mostrarModoFormulario(form, editando) {
 // ---------- Períodos de vacaciones ----------
 
 // ¿El día ("aaaa-mm-dd") cae dentro del año elegido y del contrato?
-function estaDentroDelContrato(texto) {
-  const { anio, inicioContrato, finContrato } = datos.empleado;
-  if (!texto.startsWith(anio + "-")) return false;
+// Las funciones de esta sección miran a la persona elegida, salvo que se les pase otra.
+function estaDentroDelContrato(texto, empleado = empleadoActual()) {
+  const { inicioContrato, finContrato } = empleado;
+  if (!texto.startsWith(datos.anio + "-")) return false;
   if (inicioContrato && texto < inicioContrato) return false;
   if (finContrato && texto > finContrato) return false;
   return true;
@@ -356,19 +475,19 @@ function esFestivo(texto) {
   return datos.festivos.some((festivo) => festivo.fecha === texto);
 }
 
-function trabajaEseDia(fecha) {
-  return datos.empleado.diasLaborables.includes(fecha.getDay());
+function trabajaEseDia(fecha, empleado = empleadoActual()) {
+  return empleado.diasLaborables.includes(fecha.getDay());
 }
 
 // ¿Un día de vacaciones se descuenta del saldo?
 // Laborables: solo los días que trabaja y que no son festivos.
 // Naturales: todos los días, festivos incluidos.
 // En los dos casos, solo si cae dentro del año y del contrato.
-function cuentaComoVacaciones(fecha) {
+function cuentaComoVacaciones(fecha, empleado = empleadoActual()) {
   const texto = fechaATexto(fecha);
-  if (!estaDentroDelContrato(texto)) return false;
-  if (datos.empleado.formaDeContar === "naturales") return true;
-  return trabajaEseDia(fecha) && !esFestivo(texto);
+  if (!estaDentroDelContrato(texto, empleado)) return false;
+  if (empleado.formaDeContar === "naturales") return true;
+  return trabajaEseDia(fecha, empleado) && !esFestivo(texto);
 }
 
 // Recorre un período día por día y hace algo con cada fecha.
@@ -381,10 +500,10 @@ function recorrerPeriodo(periodo, hacerConCadaDia) {
   }
 }
 
-function contarDiasDeVacaciones(periodo) {
+function contarDiasDeVacaciones(periodo, empleado = empleadoActual()) {
   let cantidad = 0;
   recorrerPeriodo(periodo, (fecha) => {
-    if (cuentaComoVacaciones(fecha)) cantidad++;
+    if (cuentaComoVacaciones(fecha, empleado)) cantidad++;
   });
   return cantidad;
 }
@@ -405,7 +524,8 @@ let periodoEditando = -1; // posición del período que se está editando; -1 si
 // Devuelve la clave del texto de error, o "" si el período se puede guardar.
 function validarPeriodo(periodo) {
   const { desde, hasta } = periodo;
-  const { anio, inicioContrato, finContrato } = datos.empleado;
+  const { inicioContrato, finContrato } = empleadoActual();
+  const anio = datos.anio;
 
   if (!desde || !hasta) return "errorPeriodoIncompleto";
   if (hasta < desde) return "errorPeriodoOrden";
@@ -416,7 +536,7 @@ function validarPeriodo(periodo) {
 
   // Dos períodos se pisan si uno empieza antes de que termine el otro.
   // El que se está editando no cuenta, porque se va a reemplazar.
-  const sePisa = datos.periodos.some(
+  const sePisa = empleadoActual().periodos.some(
     (otro, posicion) => posicion !== periodoEditando && desde <= otro.hasta && hasta >= otro.desde
   );
   if (sePisa) return "errorPeriodoSolapado";
@@ -433,11 +553,11 @@ function guardarPeriodo(evento) {
   if (errorPeriodo) return;
 
   if (periodoEditando >= 0) {
-    datos.periodos[periodoEditando] = periodo; // reemplaza el que se estaba editando
+    empleadoActual().periodos[periodoEditando] = periodo; // reemplaza el que se estaba editando
   } else {
-    datos.periodos.push(periodo);
+    empleadoActual().periodos.push(periodo);
   }
-  datos.periodos.sort((a, b) => a.desde.localeCompare(b.desde)); // ordenados por fecha
+  empleadoActual().periodos.sort((a, b) => a.desde.localeCompare(b.desde)); // ordenados por fecha
   guardarDatos();
   cancelarEdicionPeriodo();
 }
@@ -445,8 +565,8 @@ function guardarPeriodo(evento) {
 // Pasa las fechas del período al formulario de arriba para cambiarlas.
 function editarPeriodo(posicion) {
   periodoEditando = posicion;
-  formPeriodo.desde.value = datos.periodos[posicion].desde;
-  formPeriodo.hasta.value = datos.periodos[posicion].hasta;
+  formPeriodo.desde.value = empleadoActual().periodos[posicion].desde;
+  formPeriodo.hasta.value = empleadoActual().periodos[posicion].hasta;
   errorPeriodo = "";
   actualizarPantalla();
   formPeriodo.desde.focus();
@@ -460,7 +580,7 @@ function cancelarEdicionPeriodo() {
 }
 
 function borrarPeriodo(posicion) {
-  datos.periodos.splice(posicion, 1);
+  empleadoActual().periodos.splice(posicion, 1);
   guardarDatos();
   cancelarEdicionPeriodo();
 }
@@ -476,7 +596,7 @@ function mostrarPeriodos() {
   const lista = document.getElementById("lista-periodos");
   lista.innerHTML = "";
 
-  datos.periodos.forEach((periodo, posicion) => {
+  empleadoActual().periodos.forEach((periodo, posicion) => {
     const fila = document.createElement("li");
     fila.classList.toggle("fila-editando", posicion === periodoEditando);
 
@@ -515,7 +635,7 @@ let festivoEditando = -1; // posición del festivo que se está editando; -1 si 
 // Devuelve la clave del texto de error, o "" si el festivo se puede guardar.
 function validarFestivo(festivo) {
   if (!festivo.fecha) return "errorFestivoSinFecha";
-  if (!festivo.fecha.startsWith(datos.empleado.anio + "-")) return "errorFestivoFueraDelAnio";
+  if (!festivo.fecha.startsWith(datos.anio + "-")) return "errorFestivoFueraDelAnio";
 
   const repetido = datos.festivos.some(
     (otro, posicion) => posicion !== festivoEditando && otro.fecha === festivo.fecha
@@ -603,6 +723,7 @@ function mostrarFestivos() {
 
 // Vuelve a dibujar todo lo que depende de los datos.
 function actualizarPantalla() {
+  mostrarEquipo();
   mostrarResumen();
   mostrarDiasPorMes();
   mostrarCalendario();
@@ -619,12 +740,14 @@ formFestivo.querySelector(".boton-cancelar").addEventListener("click", cancelarE
 
 document.getElementById("boton-idioma").addEventListener("click", cambiarIdioma);
 document.getElementById("boton-tema").addEventListener("click", cambiarTema);
+document.getElementById("boton-agregar-empleado").addEventListener("click", agregarEmpleado);
+campoAnio.addEventListener("input", alCambiarAnio);
 
 // Las secciones plegables recuerdan si el usuario las abrió o cerró.
 // Si nunca las tocó: "Datos del empleado" arranca plegada cuando ya está completa,
 // así quien vuelve llega rápido a sus vacaciones. Las demás arrancan abiertas.
 function empleadoCompleto() {
-  const empleado = datos.empleado;
+  const empleado = empleadoActual();
   return empleado.nombre !== "" && empleado.diasVacaciones !== "" && !validarEmpleado(empleado);
 }
 
@@ -655,5 +778,5 @@ document.querySelectorAll(".plegable").forEach((seccion) => {
 });
 formulario.addEventListener("input", alCambiarFormulario);
 mostrarEmpleado();
-errorActual = validarEmpleado(datos.empleado);
+errorActual = validarEmpleado(empleadoActual());
 aplicarIdioma();

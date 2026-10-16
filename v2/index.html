@@ -33,20 +33,66 @@
     <p class="aclaracion" data-i18n="notaPrivacidad"></p>
 
     <!-- <details> se abre y se cierra solo al tocar el título. -->
-    <details class="tarjeta plegable" id="seccion-empleado" open>
-      <summary><h2><span class="paso">1</span><span data-i18n="datosEmpleado"></span></h2></summary>
+    <details class="tarjeta plegable" id="seccion-equipo" open>
+      <summary><h2><span class="paso">1</span><span data-i18n="equipo"></span></h2></summary>
 
-      <form id="form-empleado">
+      <label class="campo campo-anio">
+        <span data-i18n="anio"></span>
+        <input type="number" id="campo-anio" min="2000" max="2100">
+      </label>
+      <p class="aclaracion" data-i18n="notaEquipo"></p>
+
+      <ul id="lista-equipo" class="lista"></ul>
+      <div class="acciones">
+        <button type="button" class="boton-secundario" id="boton-agregar-empleado" data-i18n="agregarEmpleado"></button>
+      </div>
+    </details>
+
+    <details class="tarjeta plegable" id="seccion-festivos" open>
+      <summary><h2><span class="paso">2</span><span data-i18n="festivosEquipo"></span></h2></summary>
+
+      <form id="form-festivo" class="fila fila-agregar">
         <label class="campo">
-          <span data-i18n="nombre"></span>
+          <span data-i18n="fecha"></span>
+          <input type="date" name="fecha">
+        </label>
+        <label class="campo">
+          <span data-i18n="nombreFestivo"></span>
           <input type="text" name="nombre">
         </label>
+        <button type="submit" class="boton-principal"></button>
+        <button type="button" class="boton-secundario boton-cancelar" data-i18n="cancelar" hidden></button>
+      </form>
+      <p id="error-festivo" class="error"></p>
+      <p class="aclaracion" data-i18n="notaFestivos"></p>
 
+      <div class="acciones">
+        <button type="button" class="boton-secundario" id="boton-importar" data-i18n="importarFestivos"></button>
+        <button type="button" class="boton-enlace" id="boton-plantilla" data-i18n="descargarPlantilla"></button>
+        <input type="file" id="archivo-festivos" accept=".csv,.xlsx,.xls" hidden>
+      </div>
+      <p class="aclaracion" data-i18n="notaImportar"></p>
+      <div id="resultado-importacion"></div>
+
+      <ul id="lista-festivos" class="lista"></ul>
+    </details>
+
+    <details class="tarjeta plegable" id="seccion-empleado" open>
+      <summary><h2><span class="paso">3</span><span id="titulo-datos-empleado"></span></h2></summary>
+
+      <form id="form-empleado">
         <div class="fila">
           <label class="campo">
-            <span data-i18n="anio"></span>
-            <input type="number" name="anio" min="2000" max="2100">
+            <span data-i18n="nombre"></span>
+            <input type="text" name="nombre">
           </label>
+          <label class="campo">
+            <span data-i18n="mail"></span>
+            <input type="email" name="mail">
+          </label>
+        </div>
+
+        <div class="fila">
           <label class="campo">
             <span data-i18n="inicioContrato"></span>
             <input type="date" name="inicioContrato">
@@ -96,37 +142,8 @@
       </form>
     </details>
 
-    <details class="tarjeta plegable" id="seccion-festivos" open>
-      <summary><h2><span class="paso">2</span><span data-i18n="festivos"></span></h2></summary>
-
-      <form id="form-festivo" class="fila fila-agregar">
-        <label class="campo">
-          <span data-i18n="fecha"></span>
-          <input type="date" name="fecha">
-        </label>
-        <label class="campo">
-          <span data-i18n="nombreFestivo"></span>
-          <input type="text" name="nombre">
-        </label>
-        <button type="submit" class="boton-principal"></button>
-        <button type="button" class="boton-secundario boton-cancelar" data-i18n="cancelar" hidden></button>
-      </form>
-      <p id="error-festivo" class="error"></p>
-      <p class="aclaracion" data-i18n="notaFestivos"></p>
-
-      <div class="acciones">
-        <button type="button" class="boton-secundario" id="boton-importar" data-i18n="importarFestivos"></button>
-        <button type="button" class="boton-enlace" id="boton-plantilla" data-i18n="descargarPlantilla"></button>
-        <input type="file" id="archivo-festivos" accept=".csv,.xlsx,.xls" hidden>
-      </div>
-      <p class="aclaracion" data-i18n="notaImportar"></p>
-      <div id="resultado-importacion"></div>
-
-      <ul id="lista-festivos" class="lista"></ul>
-    </details>
-
     <details class="tarjeta plegable" id="seccion-periodos" open>
-      <summary><h2><span class="paso">3</span><span data-i18n="periodosVacaciones"></span></h2></summary>
+      <summary><h2><span class="paso">4</span><span id="titulo-periodos"></span></h2></summary>
 
       <form id="form-periodo" class="fila fila-agregar">
         <label class="campo">
@@ -148,7 +165,7 @@
 
     <section class="tarjeta">
       <div class="encabezado-tarjeta">
-        <h2><span class="paso">4</span><span id="titulo-resumen"></span></h2>
+        <h2><span class="paso">5</span><span id="titulo-resumen"></span></h2>
         <p class="aclaracion" id="estado-guardado"></p>
       </div>
       <div class="indicadores">
