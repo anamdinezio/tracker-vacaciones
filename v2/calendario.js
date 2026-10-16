@@ -9,8 +9,12 @@
 // Colores para cada persona, en orden. Si hay más personas que colores, se repiten.
 const COLORES_PERSONAS = ["#2a7f6f", "#2f62c9", "#7b3fb5", "#c25a0e", "#c03a7a", "#5f7d1e", "#8a5a2b", "#4a5a73"];
 
+// Se usan con transparencia ("59" al final es 35% en hexadecimal), así quedan suaves
+// y el borde rojo de los solapes se distingue bien.
+const TRANSPARENCIA = "59";
+
 function colorDePersona(empleado) {
-  return COLORES_PERSONAS[datos.empleados.indexOf(empleado) % COLORES_PERSONAS.length];
+  return COLORES_PERSONAS[datos.empleados.indexOf(empleado) % COLORES_PERSONAS.length] + TRANSPARENCIA;
 }
 
 // La persona que se ve sola, o null si se ve todo el equipo.
@@ -55,7 +59,7 @@ function pintarConColores(celda, personas) {
   const ancho = 100 / colores.length;
   const franjas = colores.map((color, i) => `${color} ${i * ancho}% ${(i + 1) * ancho}%`);
   celda.style.background = `linear-gradient(135deg, ${franjas.join(", ")})`;
-  celda.style.color = "#ffffff";
+  celda.style.color = "var(--texto)";
   if (personas.length >= 2) celda.classList.add("dia-con-solape");
 }
 
