@@ -1,0 +1,790 @@
+/* Todos los colores se definen acá, una vez para el modo claro y otra para el oscuro. */
+:root {
+  color-scheme: light; /* calendarios y casillas del navegador en claro */
+  --fondo: #f7f7f5;
+  --superficie: #ffffff;
+  --campo-fondo: #ffffff;
+  --texto: #1f2328;
+  --texto-suave: #5b616b;
+  --texto-aclaracion: #8a9099;
+  --borde: #dcdcd7;
+  --acento: #2f6f62;
+  --acento-suave: #eef5f3;
+  --texto-sobre-acento: #ffffff;
+  --error: #b42318;
+  --error-suave: #fdf0ef;
+  --alerta: #c4620a;
+  --alerta-suave: #fff4e8;
+  --festivo-fondo: #fde7c2;
+  --festivo-texto: #8a5300;
+  --festivo-suave: #fffaf1;
+  --festivo-borde: #f0dcb4;
+  --festivo-numero: #a8782e;
+  --no-laborable-fondo: #ececea;
+  --no-laborable-texto: #8a9099;
+  --fuera-texto: #c9ccd1;
+}
+
+/* Modo oscuro. Solo en pantalla: al imprimir siempre sale en claro. */
+@media screen {
+  :root[data-tema="oscuro"] {
+    color-scheme: dark;
+    --fondo: #14171a;
+    --superficie: #1d2125;
+    --campo-fondo: #15191c;
+    --texto: #e6e8ea;
+    --texto-suave: #a9b0b8;
+    --texto-aclaracion: #7d858e;
+    --borde: #343a40;
+    --acento: #5fb3a1;
+    --acento-suave: #1f332e;
+    --texto-sobre-acento: #0f1a17;
+    --error: #f0857a;
+    --error-suave: #3a1f1d;
+    --alerta: #f0a35e;
+    --alerta-suave: #3a2a1a;
+    --festivo-fondo: #4a3a1c;
+    --festivo-texto: #f3cf8e;
+    --festivo-suave: #2a2418;
+    --festivo-borde: #5a4826;
+    --festivo-numero: #e2b469;
+    --no-laborable-fondo: #2a2f34;
+    --no-laborable-texto: #8a929b;
+    --fuera-texto: #4a5158;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--fondo);
+  color: var(--texto);
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  line-height: 1.5;
+}
+
+.encabezado {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 24px;
+  background: var(--superficie);
+  border-bottom: 1px solid var(--borde);
+}
+
+.encabezado h1 {
+  margin: 0;
+  font-size: 1.4rem;
+  color: var(--acento);
+}
+
+.boton-idioma {
+  padding: 6px 14px;
+  border: 1px solid var(--acento);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--acento);
+  font: inherit;
+  cursor: pointer;
+}
+
+.boton-idioma:hover {
+  background: var(--acento);
+  color: var(--texto-sobre-acento);
+}
+
+.botones-encabezado {
+  display: flex;
+  gap: 8px;
+}
+
+/* Botón de modo claro / oscuro: solo un ícono. */
+.boton-tema {
+  display: flex;
+  align-items: center;
+  padding: 6px 10px;
+}
+
+.boton-tema svg {
+  width: 18px;
+  height: 18px;
+}
+
+main {
+  flex: 1;
+  width: 100%;
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 24px 16px;
+}
+
+.intro {
+  margin-bottom: 4px;
+  color: var(--texto-suave);
+}
+
+.pie {
+  padding: 16px;
+  text-align: center;
+  font-size: 0.9rem;
+  color: var(--texto-suave);
+  border-top: 1px solid var(--borde);
+}
+
+.pie a {
+  color: var(--acento);
+}
+
+/* Mensajes y aclaraciones: gris claro, como un comentario. */
+.aclaracion {
+  margin-top: 0;
+  font-size: 0.9rem;
+  color: var(--texto-aclaracion);
+}
+
+/* Bloques blancos que agrupan cada sección. */
+.tarjeta {
+  margin-top: 24px;
+  padding: 20px;
+  background: var(--superficie);
+  border: 1px solid var(--borde);
+  border-radius: 8px;
+}
+
+.tarjeta h2 {
+  display: flex;
+  align-items: center;
+  margin: 0 0 16px;
+  font-size: 1.1rem;
+}
+
+/* Número de paso delante del título de la sección: "1. Datos del empleado". */
+.paso {
+  margin-right: 6px;
+  color: var(--texto-aclaracion); /* gris: acompaña al título sin competir */
+}
+
+.paso::after {
+  content: ".";
+}
+
+/* Un campo: el texto arriba y la casilla abajo. */
+.campo {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 12px;
+  font-size: 0.9rem;
+  color: var(--texto-suave);
+}
+
+.campo input {
+  height: 40px; /* misma altura para texto, números y fechas */
+  padding: 8px 10px;
+  border: 1px solid var(--borde);
+  border-radius: 6px;
+  background: var(--campo-fondo);
+  font: inherit;
+  color: var(--texto);
+}
+
+.campo input:focus {
+  outline: 2px solid var(--acento);
+  outline-offset: -1px;
+}
+
+/* Varios campos en la misma línea; en pantallas chicas bajan solos. */
+.fila {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 16px;
+}
+
+.fila .campo {
+  flex: 1 1 180px;
+}
+
+.fila + .aclaracion {
+  margin-top: -4px;
+}
+
+fieldset {
+  margin: 16px 0 0;
+  padding: 0;
+  border: none;
+}
+
+legend {
+  margin-bottom: 8px;
+  font-size: 0.9rem;
+  color: var(--texto-suave);
+}
+
+.opciones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 20px;
+}
+
+.opciones label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+}
+
+.opciones input {
+  accent-color: var(--acento);
+}
+
+/* Errores: en rojo para que se noten. */
+.error {
+  margin: 16px 0 0;
+  color: var(--error);
+}
+
+form > .aclaracion:last-child {
+  margin: 16px 0 0;
+}
+
+.error:empty {
+  display: none;
+}
+
+/* Resumen: tres números grandes uno al lado del otro. */
+.indicadores {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 12px;
+}
+
+.indicador {
+  display: flex;
+  flex-direction: column;
+  padding: 14px 16px;
+  border: 1px solid var(--borde);
+  border-radius: 8px;
+  font-size: 0.9rem;
+  color: var(--texto-suave);
+}
+
+.indicador-numero {
+  font-size: 2rem;
+  font-weight: 600;
+  line-height: 1.2;
+  color: var(--texto);
+}
+
+.indicador-destacado {
+  border-color: var(--acento);
+  background: var(--acento-suave);
+}
+
+.indicador-destacado .indicador-numero {
+  color: var(--acento);
+}
+
+.indicadores + .aclaracion {
+  margin: 12px 0 0;
+}
+
+/* Formulario de una línea para agregar un período. */
+.fila-agregar {
+  align-items: flex-end;
+}
+
+.boton-principal {
+  margin-bottom: 12px;
+  padding: 9px 20px;
+  border: none;
+  border-radius: 6px;
+  background: var(--acento);
+  color: var(--texto-sobre-acento);
+  font: inherit;
+  cursor: pointer;
+}
+
+.boton-principal:hover {
+  opacity: 0.9;
+}
+
+.fila-agregar + .error {
+  margin-top: 0;
+}
+
+/* Listas de períodos y festivos cargados. */
+.lista {
+  margin: 8px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.lista li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 0;
+  border-top: 1px solid var(--borde);
+}
+
+.lista-detalle {
+  margin: 0 8px 0 auto;
+  color: var(--texto-suave);
+}
+
+.boton-chico {
+  padding: 4px 10px;
+  border: 1px solid var(--borde);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--texto-suave);
+  font: inherit;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.boton-editar:hover {
+  border-color: var(--acento);
+  color: var(--acento);
+}
+
+/* La fila que se está editando queda resaltada. */
+.lista li.fila-editando {
+  background: var(--acento-suave);
+}
+
+.boton-secundario {
+  margin-bottom: 12px;
+  padding: 9px 16px;
+  border: 1px solid var(--borde);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--texto-suave);
+  font: inherit;
+  cursor: pointer;
+}
+
+.boton-secundario[hidden] {
+  display: none;
+}
+
+/* Botón que borra datos: se pone rojo al pasar el mouse. */
+.boton-peligro:hover,
+.boton-borrar:hover {
+  border-color: var(--error);
+  color: var(--error);
+}
+
+/* Cuando quedan menos de 5 días. */
+.indicador-alerta,
+.indicador-alerta .indicador-numero {
+  border-color: var(--alerta);
+  background: var(--alerta-suave);
+  color: var(--alerta);
+}
+
+/* Cuando se usan más días de los que hay. */
+.indicador-negativo,
+.indicador-negativo .indicador-numero {
+  border-color: var(--error);
+  background: var(--error-suave);
+  color: var(--error);
+}
+
+/* Título de tarjeta con un dato al costado (por ejemplo, la hora de guardado). */
+.encabezado-tarjeta {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 4px 16px;
+  margin-bottom: 16px;
+}
+
+.encabezado-tarjeta h2,
+.encabezado-tarjeta .aclaracion {
+  margin: 0;
+}
+
+.fila-agregar + .error + .aclaracion {
+  margin-top: 0;
+}
+
+/* Aviso dentro de una fila de la lista. */
+.lista-aviso {
+  font-size: 0.85rem;
+  color: var(--alerta);
+}
+
+/* Gráfico de días por mes. */
+#bloque-dias-por-mes h3 {
+  margin: 24px 0 8px;
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+#bloque-dias-por-mes[hidden] {
+  display: none;
+}
+
+.grafico-meses {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 6px;
+}
+
+.columna-mes {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.columna-area {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: center;
+  width: 100%;
+  height: 100px;
+}
+
+.columna-barra {
+  width: 100%;
+  max-width: 32px;
+  border-radius: 4px 4px 0 0;
+  background: var(--acento);
+}
+
+.columna-numero {
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.columna-etiqueta {
+  font-size: 0.75rem;
+  color: var(--texto-suave);
+}
+
+/* Colores de los días: se usan en el calendario y en la leyenda. */
+.dia-vacaciones {
+  background: var(--acento);
+  color: var(--texto-sobre-acento);
+}
+
+.dia-festivo {
+  background: var(--festivo-fondo);
+  color: var(--festivo-texto);
+}
+
+.dia-no-laborable {
+  background: var(--no-laborable-fondo);
+  color: var(--no-laborable-texto);
+}
+
+.dia-fuera {
+  color: var(--fuera-texto);
+}
+
+.leyenda {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 20px;
+  margin-bottom: 16px;
+  font-size: 0.85rem;
+  color: var(--texto-suave);
+}
+
+.leyenda > span {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.muestra {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border-radius: 3px;
+}
+
+.muestra.dia-fuera {
+  border: 1px dashed var(--fuera-texto);
+}
+
+/* Calendario anual: los meses se acomodan solos según el ancho. */
+.calendario {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 20px;
+}
+
+.mes-titulo {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 6px;
+  font-weight: 600;
+}
+
+.mes-cantidad {
+  font-size: 0.8rem;
+  font-weight: normal;
+  color: var(--acento);
+}
+
+.mes-grilla {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+  text-align: center;
+  font-size: 0.8rem;
+}
+
+.dia-semana {
+  padding-bottom: 2px;
+  font-size: 0.7rem;
+  color: var(--texto-aclaracion);
+}
+
+.dia {
+  padding: 3px 0;
+  border-radius: 4px;
+}
+
+.dia-hoy {
+  outline: 2px solid var(--texto);
+  outline-offset: -2px;
+  font-weight: 600;
+}
+
+/* Secciones que se pliegan tocando el título. */
+.plegable summary {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  list-style: none; /* oculta el triángulo que pone el navegador */
+}
+
+.plegable summary::-webkit-details-marker {
+  display: none;
+}
+
+/* Flecha propia: apunta abajo si está abierto, a la derecha si está cerrado. */
+.plegable summary::after {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-right: 2px solid var(--texto-suave);
+  border-bottom: 2px solid var(--texto-suave);
+  transform: rotate(45deg);
+  transition: transform 0.2s;
+}
+
+.plegable:not([open]) summary::after {
+  transform: rotate(-45deg);
+}
+
+.plegable:not([open]) summary h2 {
+  margin-bottom: 0;
+}
+
+/* Texto chico debajo del nombre del indicador. */
+.indicador-detalle {
+  font-size: 0.8rem;
+  color: var(--texto-aclaracion);
+}
+
+/* Fila de botones secundarios (importar, descargar plantilla). */
+.acciones {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 16px;
+  margin-top: 8px;
+}
+
+.acciones .boton-secundario {
+  margin-bottom: 0;
+}
+
+.acciones + .aclaracion {
+  margin-top: 6px;
+}
+
+.boton-enlace {
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--acento);
+  font: inherit;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+#resultado-importacion .error,
+#resultado-importacion .aclaracion {
+  margin: 8px 0 0;
+}
+
+.lista-errores {
+  margin: 4px 0 0;
+  padding-left: 20px;
+  font-size: 0.85rem;
+  color: var(--error);
+}
+
+/* Festivos laborables: tono suave de festivo (como en el calendario), porque no son vacaciones. */
+.indicador-festivos {
+  border-color: var(--festivo-borde);
+  background: var(--festivo-suave);
+}
+
+.indicador-festivos .indicador-numero {
+  color: var(--festivo-numero);
+}
+
+.aclaracion + .aclaracion {
+  margin-top: -8px;
+}
+
+/* Texto normal dentro de una tarjeta (no es comentario). */
+.descripcion {
+  margin: 0 0 4px;
+}
+
+.descripcion + .aclaracion {
+  margin-top: 0;
+}
+
+/* El botón de imprimir va a la derecha de la leyenda. */
+#boton-imprimir {
+  margin-left: auto;
+}
+
+.solo-impresion {
+  display: none;
+}
+
+/* ---------- Impresión: solo el calendario, en una hoja vertical ---------- */
+/* El margen va dentro de la página (padding del body) y no en @page,
+   así se respeta aunque en la vista previa elijan "Márgenes: ninguno". */
+@page {
+  size: A4 portrait;
+  margin: 0;
+}
+
+@media print {
+  body {
+    padding: 12mm 14mm;
+    background: white;
+    min-height: 0;
+  }
+
+  /* Se oculta todo menos el calendario y el pie. */
+  .encabezado,
+  main > *:not(#seccion-calendario),
+  .no-imprimir,
+  .plegable summary::after {
+    display: none !important;
+  }
+
+  main {
+    max-width: none;
+    padding: 0;
+  }
+
+  .solo-impresion {
+    display: inline;
+    font-weight: normal;
+  }
+
+  #seccion-calendario {
+    margin: 0;
+    padding: 0;
+    border: none;
+  }
+
+  #seccion-calendario summary h2 {
+    margin-bottom: 4px;
+    font-size: 16pt;
+  }
+
+  .leyenda {
+    margin-bottom: 8px;
+    font-size: 9pt;
+  }
+
+  /* 3 meses por fila, 4 filas: el año entero en una hoja. */
+  .calendario {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 22px 24px;
+  }
+
+  .mes {
+    break-inside: avoid;
+  }
+
+  .mes-titulo {
+    margin-bottom: 2px;
+    font-size: 10pt;
+  }
+
+  .mes-grilla {
+    font-size: 10pt;
+  }
+
+  .dia {
+    padding: 4px 0;
+  }
+
+  .dia-hoy {
+    outline: none;
+    font-weight: normal;
+  }
+
+  /* Que la impresora respete los colores de fondo. */
+  .dia,
+  .muestra {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .pie {
+    padding: 6px 0 0;
+    border: none;
+    font-size: 8pt;
+    text-align: right;
+  }
+}
+
+/* Saldo debajo del formulario de períodos. */
+#saldo-periodos {
+  margin: 0 0 4px;
+}
+
+#saldo-periodos:empty {
+  display: none;
+}
+
+/* "Empezar de cero" queda separado de los otros botones. */
+.acciones .boton-peligro {
+  margin-left: auto;
+}
+
+@media print {
+  .paso {
+    display: none;
+  }
+}
+
+#nota-proporcional:empty {
+  display: none;
+}
