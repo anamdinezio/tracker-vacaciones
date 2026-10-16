@@ -74,7 +74,9 @@ function mostrarAprobacion() {
     )
   );
 
+  exito.append(crearElemento("p", "", textos.notaAdjuntarReporte));
   const acciones = crearElemento("div", "acciones-aprobacion");
+  acciones.append(crearBotonDeFila(textos.guardarReporte, "boton-aprobar", () => imprimirReporte(empleado)));
   if (empleado.mail) {
     const enlace = crearElemento("a", "boton-chico boton-aprobar", textos.avisarAprobacion.replace("{nombre}", nombre));
     enlace.href = linkDeAprobacion(empleado, periodo);

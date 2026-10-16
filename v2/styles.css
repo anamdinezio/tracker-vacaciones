@@ -1034,7 +1034,69 @@ a.boton-chico {
   margin: 0;
 }
 
+/* Reporte de una persona: no se ve en pantalla, solo al imprimirlo. */
+#reporte {
+  display: none;
+}
+
+.reporte-tabla {
+  width: 100%;
+  margin: 4px 0 16px;
+  border-collapse: collapse;
+  font-size: 10pt;
+}
+
+.reporte-tabla th,
+.reporte-tabla td {
+  padding: 4px 8px;
+  border-bottom: 1px solid var(--borde);
+  text-align: left;
+}
+
+.reporte-tabla th {
+  color: var(--texto-suave);
+  font-weight: 600;
+}
+
 @media print {
+  /* Imprimiendo el reporte: se ve solo el reporte, no la página. */
+  body.imprimiendo-reporte .encabezado,
+  body.imprimiendo-reporte main {
+    display: none !important;
+  }
+
+  body.imprimiendo-reporte #reporte {
+    display: block;
+  }
+
+  #reporte h1 {
+    margin: 0 0 2px;
+    font-size: 18pt;
+  }
+
+  #reporte h2 {
+    margin: 14px 0 4px;
+    font-size: 12pt;
+  }
+
+  #reporte .indicadores {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+  }
+
+  #reporte .indicador {
+    padding: 8px 10px;
+  }
+
+  #reporte .indicador-numero {
+    font-size: 16pt;
+  }
+
+  /* El calendario empieza en una hoja nueva. */
+  .reporte-calendario {
+    break-before: page;
+  }
+
   body {
     padding: 12mm 14mm;
     background: white;

@@ -207,7 +207,16 @@ function mostrarCalendario() {
     titulo.append(crearElemento("span", "solo-impresion", " · " + nombreImpreso));
   }
   mostrarControlesCalendario();
+  dibujarMeses(contenedor, persona);
+}
 
+// Dibuja los 12 meses en el contenedor: de una persona, o de todo el equipo si persona es null.
+// La usan el calendario de la pestaña y el reporte en PDF.
+function dibujarMeses(contenedor, persona) {
+  const textos = TEXTOS[idioma];
+  const anio = datos.anio;
+  const equipo = !persona;
+  contenedor.innerHTML = "";
   if (!anio) return; // sin año no hay calendario
 
   const porMes = equipo ? [] : diasDeVacacionesPorMes(persona);

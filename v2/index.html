@@ -199,6 +199,7 @@
       <section class="tarjeta">
         <div class="encabezado-tarjeta">
           <h2><span data-i18n="resumen"></span></h2>
+          <button type="button" class="boton-enlace no-imprimir" id="boton-reporte" data-i18n="guardarReporte"></button>
           <p class="aclaracion" id="estado-guardado"></p>
         </div>
         <div class="indicadores">
@@ -336,6 +337,9 @@
     </div>
   </main>
 
+  <!-- Reporte de una persona para guardar en PDF. Solo se ve al imprimirlo (ver reporte.js). -->
+  <section id="reporte"></section>
+
   <footer class="pie">
     <span data-i18n="hechoPor"></span>
     <a href="https://www.linkedin.com/in/ana-di-nezio-perez/" target="_blank" rel="noopener">Ana Di Nezio</a>
@@ -348,6 +352,7 @@
   <script src="solapes.js?v=5"></script>
   <script src="pedidos.js?v=5"></script>
   <script src="aprobacion.js?v=5"></script>
+  <script src="reporte.js?v=5"></script>
   <script src="pestanias.js?v=5"></script>
   <script src="app.js?v=5"></script>
 </body>
