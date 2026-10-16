@@ -45,22 +45,34 @@ function leerCsv(texto) {
   return lineas.map((linea) => dividirLineaCsv(linea, separador));
 }
 
-// En Excel las fechas son números (días desde 1900); los pasamos a "aaaa-mm-dd".
+// En Excel las fechas son números (días desde 1900) con formato de fecha; las pasamos a "aaaa-mm-dd".
+// Los números sin formato de fecha (por ejemplo, 22 días por año) quedan como número.
 async function leerExcel(archivo) {
   await cargarLibreriaExcel();
-  const libro = XLSX.read(await archivo.arrayBuffer());
+  const libro = XLSX.read(await archivo.arrayBuffer(), { cellNF: true }); // cellNF: guarda el formato de cada celda
   const hoja = libro.Sheets[libro.SheetNames[0]];
-  const filas = XLSX.utils.sheet_to_json(hoja, { header: 1, raw: true, defval: "" });
+  if (!hoja["!ref"]) return [];
+  const rango = XLSX.utils.decode_range(hoja["!ref"]);
 
-  return filas.map((fila) =>
-    fila.map((celda) => {
-      if (typeof celda === "number") {
-        const fecha = XLSX.SSF.parse_date_code(celda);
-        return fecha.y + "-" + String(fecha.m).padStart(2, "0") + "-" + String(fecha.d).padStart(2, "0");
-      }
-      return String(celda).trim();
-    })
-  );
+  const filas = [];
+  for (let f = rango.s.r; f <= rango.e.r; f++) {
+    const fila = [];
+    for (let c = rango.s.c; c <= rango.e.c; c++) {
+      const celda = hoja[XLSX.utils.encode_cell({ r: f, c })];
+      fila.push(textoDeCelda(celda));
+    }
+    filas.push(fila);
+  }
+  return filas;
+}
+
+function textoDeCelda(celda) {
+  if (!celda || celda.v === undefined) return "";
+  if (celda.t === "n" && celda.z && XLSX.SSF.is_date(celda.z)) {
+    const fecha = XLSX.SSF.parse_date_code(celda.v);
+    return fecha.y + "-" + String(fecha.m).padStart(2, "0") + "-" + String(fecha.d).padStart(2, "0");
+  }
+  return String(celda.v).trim();
 }
 
 // ---------- Entender las fechas ----------

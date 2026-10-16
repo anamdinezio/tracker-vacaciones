@@ -1,7 +1,8 @@
 // Pedidos de vacaciones: cada persona recibe la plantilla en blanco, completa sus datos
 // y se la devuelve al jefe, que sube uno o varios archivos juntos.
-// Plantilla de una persona: títulos en la fila 1, nombre y mail en la fila 2,
+// Plantilla de una persona: títulos en la fila 1; nombre, mail y días por año en la fila 2;
 // y debajo de los títulos "Desde" y "Hasta" una fila por período.
+// Los días por año solo se toman si la persona no los tiene cargados: los del jefe no se pisan.
 // También se acepta una fila por período con las cuatro columnas: nombre, mail, desde, hasta.
 // A cada persona se la reconoce por el mail (o por el nombre si no tiene mail).
 // Si no está en el equipo, se agrega.
@@ -80,14 +81,43 @@ function leerPlantillaDePersona(filas) {
   const titulosALaIzquierda = esTitulo(filas[1]?.[0], "mail");
   const nombre = limpiar(titulosALaIzquierda ? filas[0]?.[1] : filas[1]?.[0]);
   const mail = limpiar(filas[1]?.[1]);
+  // Los días por año van en C2, debajo de su título (las plantillas viejas no los tienen).
+  const tieneDias = esTitulo(filas[0]?.[2], "diasPorAnioPlantilla");
+  const diasPorAnio = tieneDias ? limpiar(filas[1]?.[2]) : null;
   const empiezaEn = filaDeTituloDesde(filas) + 1;
   return filas.slice(empiezaEn).map((fila, i) => ({
     numeroDeFila: i + empiezaEn + 1, // como se ve en Excel
     nombre,
     mail,
+    diasPorAnio,
     textoDesde: limpiar(fila[0]),
     textoHasta: limpiar(fila[1]),
   }));
+}
+
+// Pasa los días por año del archivo a la persona, una vez por archivo.
+// Si ya tenía días cargados y son otros, se mantienen y se avisa la diferencia.
+function aplicarDiasPorAnio(empleado, texto, archivo, resultado) {
+  const nombre = empleado.nombre || empleado.mail;
+  if (texto === null) return; // plantilla vieja, sin la columna
+  if (texto === "") {
+    if (String(empleado.diasVacaciones).trim() === "") {
+      resultado.errores.push({ archivo: archivo.name, fila: 2, clave: "errorPedidoSinDias", valor: "" });
+    }
+    return;
+  }
+  const dias = Number(texto.replace(",", "."));
+  if (!Number.isFinite(dias) || dias < 0) {
+    resultado.errores.push({ archivo: archivo.name, fila: 2, clave: "errorPedidoDiasNoValidos", valor: texto });
+    return;
+  }
+
+  const actuales = String(empleado.diasVacaciones).trim();
+  if (actuales === "") {
+    empleado.diasVacaciones = String(dias);
+  } else if (Number(actuales) !== dias) {
+    resultado.diferencias.push({ nombre, archivo: dias, actuales });
+  }
 }
 
 // Una fila por período: nombre, mail, desde, hasta. Si la primera fila es el encabezado, se saltea.
@@ -122,7 +152,9 @@ async function cargarArchivoDePedidos(archivo, resultado, nuevas) {
     return;
   }
 
-  pedidos.forEach(({ numeroDeFila, nombre, mail, textoDesde, textoHasta }) => {
+  const conDiasAplicados = new Set(); // personas de este archivo a las que ya se les pasaron los días
+
+  pedidos.forEach(({ numeroDeFila, nombre, mail, diasPorAnio, textoDesde, textoHasta }) => {
     if (!textoDesde && !textoHasta) return; // fila sin fechas
 
     const anotarError = (clave, valor) =>
@@ -138,6 +170,10 @@ async function cargarArchivoDePedidos(archivo, resultado, nuevas) {
     if (hasta.error) return anotarError(hasta.error, textoHasta);
 
     const empleado = buscarOAgregarPersona(nombre, mail, nuevas);
+    if (!conDiasAplicados.has(empleado)) {
+      aplicarDiasPorAnio(empleado, diasPorAnio, archivo, resultado);
+      conDiasAplicados.add(empleado);
+    }
     const periodo = { desde: desde.fecha, hasta: hasta.fecha };
 
     // Si el mismo período ya estaba cargado (por ejemplo, al subir dos veces el archivo), no es un error.
@@ -157,11 +193,13 @@ async function cargarArchivoDePedidos(archivo, resultado, nuevas) {
 }
 
 async function cargarPedidos(archivos) {
-  const resultado = { porPersona: {}, nuevas: [], repetidos: 0, errores: [] };
+  const resultado = { porPersona: {}, nuevas: [], repetidos: 0, errores: [], diferencias: [], faltanDias: false };
   const nuevas = new Set();
   for (const archivo of archivos) await cargarArchivoDePedidos(archivo, resultado, nuevas);
 
   resultado.nuevas = [...nuevas].map((empleado) => empleado.nombre || empleado.mail);
+  // El aviso de completar días solo hace falta si alguna persona nueva quedó sin ellos.
+  resultado.faltanDias = [...nuevas].some((empleado) => String(empleado.diasVacaciones).trim() === "");
   guardarDatos();
   resultadoPedidos = resultado;
   actualizarPantalla();
@@ -174,7 +212,7 @@ function mostrarResultadoPedidos() {
   if (!resultadoPedidos) return;
 
   const textos = TEXTOS[idioma];
-  const { porPersona, nuevas, repetidos, errores } = resultadoPedidos;
+  const { porPersona, nuevas, repetidos, errores, diferencias = [], faltanDias } = resultadoPedidos;
   const nombres = Object.keys(porPersona);
 
   if (nombres.length) {
@@ -196,7 +234,16 @@ function mostrarResultadoPedidos() {
     const texto = repetidos === 1 ? textos.pedidosRepetidoUno : textos.pedidosRepetidos.replace("{n}", repetidos);
     caja.append(crearElemento("p", "aclaracion", texto));
   }
-  if (nuevas.length) caja.append(crearElemento("p", "aviso", textos.completarPersonasNuevas));
+  if (faltanDias) caja.append(crearElemento("p", "aviso", textos.completarPersonasNuevas));
+
+  // Días por año distintos a los cargados: se mantienen los del jefe y se avisa.
+  diferencias.forEach(({ nombre, archivo, actuales }) => {
+    const texto = textos.diasDistintos
+      .replace("{nombre}", nombre)
+      .replace("{archivo}", archivo)
+      .replace("{actuales}", actuales);
+    caja.append(crearElemento("p", "aviso", texto));
+  });
 
   if (errores.length) {
     const titulo = errores.length === 1 ? textos.pedidosConUnError : textos.pedidosConErrores;
@@ -225,9 +272,9 @@ async function descargarPlantillaPedidos() {
   }
 
   const filas = [
-    [textos.nombre, textos.mail],
+    [textos.nombre, textos.mail, textos.diasPorAnioPlantilla],
     [textos.nombre, textos.ejemploMail],
-    [],
+    [textos.notaPlantillaObligatorios],
     [textos.desde, textos.hasta],
     [textos.ejemploFecha, textos.ejemploFecha],
   ];
@@ -239,8 +286,8 @@ async function descargarPlantillaPedidos() {
     hoja["A" + fila] = { t: "z", z: formato };
     hoja["B" + fila] = { t: "z", z: formato };
   }
-  hoja["!ref"] = "A1:B25";
-  hoja["!cols"] = [{ wch: 22 }, { wch: 30 }]; // ancho de las columnas
+  hoja["!ref"] = "A1:C25";
+  hoja["!cols"] = [{ wch: 22 }, { wch: 30 }, { wch: 28 }]; // ancho de las columnas
 
   const libro = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(libro, hoja, textos.hojaPedidos);
