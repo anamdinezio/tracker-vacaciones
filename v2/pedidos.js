@@ -1,5 +1,7 @@
-// Pedidos de vacaciones: cada persona completa una plantilla de Excel y se la manda al jefe,
-// que sube uno o varios archivos juntos. Columnas: nombre, mail, desde, hasta.
+// Pedidos de vacaciones: cada persona recibe la plantilla en blanco, completa sus datos
+// y se la devuelve al jefe, que sube uno o varios archivos juntos.
+// Plantilla de una persona: nombre y mail arriba, y debajo una fila por período (desde, hasta).
+// También se acepta una fila por período con las cuatro columnas: nombre, mail, desde, hasta.
 // A cada persona se la reconoce por el mail (o por el nombre si no tiene mail).
 // Si no está en el equipo, se agrega.
 // Usa las funciones de importar.js (leer el archivo y entender las fechas) y los datos de app.js.
@@ -40,6 +42,52 @@ function validarPedido(empleado, periodo) {
   return "";
 }
 
+// Textos de ejemplo de la plantilla: si nadie los cambió, se ignoran.
+function esTextoDeEjemplo(texto) {
+  const ejemplos = ["es", "en"].flatMap((clave) => [
+    TEXTOS[clave].nombre,
+    TEXTOS[clave].ejemploMail,
+    TEXTOS[clave].ejemploFecha,
+  ]);
+  return ejemplos.some((ejemplo) => ejemplo.toLowerCase() === texto.toLowerCase());
+}
+
+function limpiar(celda) {
+  const texto = String(celda ?? "").trim();
+  return esTextoDeEjemplo(texto) ? "" : texto;
+}
+
+// La plantilla de una persona tiene "Mail" en la segunda fila, primera columna.
+function esPlantillaDePersona(filas) {
+  const etiqueta = String(filas[1]?.[0] ?? "").trim().toLowerCase();
+  return [TEXTOS.es.mail, TEXTOS.en.mail].some((mail) => mail.toLowerCase() === etiqueta);
+}
+
+// Nombre en B1, mail en B2, y desde la fila 5 una fila por período (desde en A, hasta en B).
+function leerPlantillaDePersona(filas) {
+  const nombre = limpiar(filas[0]?.[1]);
+  const mail = limpiar(filas[1]?.[1]);
+  return filas.slice(4).map((fila, i) => ({
+    numeroDeFila: i + 5, // como se ve en Excel
+    nombre,
+    mail,
+    textoDesde: limpiar(fila[0]),
+    textoHasta: limpiar(fila[1]),
+  }));
+}
+
+// Una fila por período: nombre, mail, desde, hasta. Si la primera fila es el encabezado, se saltea.
+function leerUnaFilaPorPeriodo(filas) {
+  const empiezaEn = filas.length && !partesDeFecha(String(filas[0][2] ?? "")) ? 1 : 0;
+  return filas.slice(empiezaEn).map((fila, i) => ({
+    numeroDeFila: i + empiezaEn + 1,
+    nombre: limpiar(fila[0]),
+    mail: limpiar(fila[1]),
+    textoDesde: limpiar(fila[2]),
+    textoHasta: limpiar(fila[3]),
+  }));
+}
+
 // Lee un archivo y carga sus filas. Suma lo que pasó en "resultado".
 async function cargarArchivoDePedidos(archivo, resultado, nuevas) {
   let filas;
@@ -51,15 +99,11 @@ async function cargarArchivoDePedidos(archivo, resultado, nuevas) {
     return;
   }
 
-  // Si la primera fila es el encabezado (nombre, mail, desde, hasta), se saltea.
-  const empiezaEn = filas.length && !partesDeFecha(filas[0][2] || "") ? 1 : 0;
-  const fechasEscritas = filas.slice(empiezaEn).flatMap((fila) => [fila[2] || "", fila[3] || ""]);
-  const orden = ordenDelArchivo(fechasEscritas);
+  const pedidos = esPlantillaDePersona(filas) ? leerPlantillaDePersona(filas) : leerUnaFilaPorPeriodo(filas);
+  const orden = ordenDelArchivo(pedidos.flatMap((pedido) => [pedido.textoDesde, pedido.textoHasta]));
 
-  filas.slice(empiezaEn).forEach((fila, i) => {
-    const numeroDeFila = i + empiezaEn + 1; // como se ve en Excel
-    const [nombre = "", mail = "", textoDesde = "", textoHasta = ""] = fila.map((celda) => String(celda).trim());
-    if (!nombre && !mail && !textoDesde && !textoHasta) return; // fila vacía
+  pedidos.forEach(({ numeroDeFila, nombre, mail, textoDesde, textoHasta }) => {
+    if (!textoDesde && !textoHasta) return; // fila sin fechas
 
     const anotarError = (clave, valor) =>
       resultado.errores.push({ archivo: archivo.name, fila: numeroDeFila, clave, valor });
@@ -144,10 +188,9 @@ function mostrarResultadoPedidos() {
 
 // ---------- Plantilla ----------
 
-// Excel con el encabezado y una fila de ejemplo, para pasarle a cada persona del equipo.
+// Excel en blanco para pasarle a cada persona: nombre y mail una vez, y debajo sus fechas.
 async function descargarPlantillaPedidos() {
   const textos = TEXTOS[idioma];
-  const anio = datos.anio || new Date().getFullYear();
 
   try {
     await cargarLibreriaExcel();
@@ -158,20 +201,27 @@ async function descargarPlantillaPedidos() {
     return;
   }
 
-  // Las fechas van como fechas de verdad, así Excel no las confunde con texto.
   const filas = [
-    [textos.nombre, textos.mail, textos.desde, textos.hasta],
-    [textos.ejemploNombre, textos.ejemploMail, leerFecha(anio + "-08-03"), leerFecha(anio + "-08-14")],
+    [textos.nombre, textos.nombre],
+    [textos.mail, textos.ejemploMail],
+    [],
+    [textos.desde, textos.hasta],
+    [textos.ejemploFecha, textos.ejemploFecha],
   ];
-  const hoja = XLSX.utils.aoa_to_sheet(filas, { cellDates: true });
+  const hoja = XLSX.utils.aoa_to_sheet(filas);
+
+  // Debajo del ejemplo, 20 filas vacías con formato de fecha, para que Excel guarde lo que se escriba como fecha.
   const formato = idioma === "es" ? "dd/mm/yyyy" : "yyyy-mm-dd";
-  hoja["C2"].z = formato;
-  hoja["D2"].z = formato;
-  hoja["!cols"] = [{ wch: 24 }, { wch: 28 }, { wch: 14 }, { wch: 14 }]; // ancho de las columnas
+  for (let fila = 6; fila <= 25; fila++) {
+    hoja["A" + fila] = { t: "z", z: formato };
+    hoja["B" + fila] = { t: "z", z: formato };
+  }
+  hoja["!ref"] = "A1:B25";
+  hoja["!cols"] = [{ wch: 22 }, { wch: 30 }]; // ancho de las columnas
 
   const libro = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(libro, hoja, textos.hojaPedidos);
-  XLSX.writeFile(libro, textos.nombrePlantillaPedidos + ".xlsx");
+  XLSX.writeFile(libro, textos.nombrePlantillaPedidos + ".xlsx", { sheetStubs: true });
 }
 
 // ---------- Botones ----------
