@@ -220,13 +220,23 @@
     <div class="panel" data-panel="calendario">
       <details class="tarjeta plegable" id="seccion-calendario" open>
         <summary><h2 id="titulo-calendario"></h2></summary>
-        <div class="opciones vista-calendario no-imprimir">
-          <label><input type="radio" name="vistaCalendario" value="equipo"> <span data-i18n="todoElEquipo"></span></label>
-          <label><input type="radio" name="vistaCalendario" value="persona"> <span id="vista-persona"></span></label>
+        <div class="controles-calendario">
+          <label class="campo no-imprimir">
+            <span data-i18n="ver"></span>
+            <select id="ver-calendario"></select>
+          </label>
+          <div id="opciones-equipo">
+            <div class="opciones no-imprimir">
+              <label><input type="radio" name="coloresCalendario" value="uno"> <span data-i18n="unColor"></span></label>
+              <label><input type="radio" name="coloresCalendario" value="persona"> <span data-i18n="colorPorPersona"></span></label>
+            </div>
+            <div class="personas-calendario" id="personas-calendario"></div>
+          </div>
         </div>
         <div class="leyenda">
-          <span><i class="muestra dia-vacaciones"></i> <span data-i18n="leyendaVacaciones"></span></span>
-          <span class="solo-vista-equipo"><i class="muestra dia-solape"></i> <span data-i18n="leyendaSolape"></span></span>
+          <span class="solo-un-color"><i class="muestra dia-vacaciones"></i> <span data-i18n="leyendaVacaciones"></span></span>
+          <span class="solo-un-color"><i class="muestra dia-solape"></i> <span data-i18n="leyendaSolape"></span></span>
+          <span class="solo-vista-persona"><i class="muestra dia-vacaciones"></i> <span data-i18n="leyendaVacaciones"></span></span>
           <span><i class="muestra dia-festivo"></i> <span data-i18n="leyendaFestivo"></span></span>
           <span class="solo-vista-persona"><i class="muestra dia-no-laborable"></i> <span data-i18n="leyendaNoLaborable"></span></span>
           <span class="solo-vista-persona"><i class="muestra dia-fuera"></i> <span data-i18n="leyendaFuera"></span></span>

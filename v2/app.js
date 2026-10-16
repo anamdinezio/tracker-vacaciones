@@ -110,6 +110,8 @@ function datosVacios() {
     festivos: [], // lista de { fecha, nombre }
     empleados: [empleadoVacio()],
     seleccionado: 0, // posición de la persona que se está viendo
+    calendarioPersona: -1, // -1: el calendario muestra todo el equipo
+    coloresPorPersona: false,
     avisarSolapes: true,
     mailAsunto: "", // vacío: se usa el texto original del idioma actual
     mailTexto: "",
@@ -273,6 +275,7 @@ function borrarEmpleado(posicion) {
   datos.empleados.splice(posicion, 1);
   // Si se borró a la persona elegida o a alguien de arriba, la elegida se corre un lugar.
   if (datos.seleccionado >= posicion) datos.seleccionado = Math.max(0, datos.seleccionado - 1);
+  datos.calendarioPersona = -1; // el calendario vuelve a mostrar todo el equipo
   elegirEmpleado(datos.seleccionado);
 }
 

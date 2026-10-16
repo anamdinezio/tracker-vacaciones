@@ -1,41 +1,116 @@
 // Calendario anual con colores y gráfico de días de vacaciones por mes.
 // Usa las funciones y los datos de app.js (se llaman cuando la página ya cargó todo).
 
-// El calendario se puede ver para todo el equipo o solo para la persona elegida.
-function vistaDeEquipo() {
-  return datos.vistaCalendario !== "persona";
+// Qué se ve en el calendario. Se guarda en los datos:
+// - datos.calendarioPersona: -1 para todo el equipo, o la posición de una persona.
+// - datos.coloresPorPersona: en la vista del equipo, un color por persona o uno solo.
+// - empleado.ocultoEnCalendario: la persona está apagada en la vista del equipo.
+
+// Colores para cada persona, en orden. Si hay más personas que colores, se repiten.
+const COLORES_PERSONAS = ["#2a7f6f", "#2f62c9", "#7b3fb5", "#c25a0e", "#c03a7a", "#5f7d1e", "#8a5a2b", "#4a5a73"];
+
+function colorDePersona(empleado) {
+  return COLORES_PERSONAS[datos.empleados.indexOf(empleado) % COLORES_PERSONAS.length];
 }
 
-// Nombres de las personas que tienen ese día de vacaciones (solo los días que se descuentan).
+// La persona que se ve sola, o null si se ve todo el equipo.
+function personaDelCalendario() {
+  return datos.empleados[datos.calendarioPersona ?? -1] ?? null;
+}
+
+// Personas encendidas que tienen ese día de vacaciones (solo los días que se descuentan).
 function quienesEstanDeVacaciones(fecha) {
   const texto = fechaATexto(fecha);
-  return datos.empleados
-    .filter((empleado) =>
+  return datos.empleados.filter(
+    (empleado) =>
+      !empleado.ocultoEnCalendario &&
       empleado.periodos.some((periodo) => texto >= periodo.desde && texto <= periodo.hasta) &&
       cuentaComoVacaciones(fecha, empleado)
-    )
-    .map((empleado) => empleado.nombre || TEXTOS[idioma].sinNombre);
+  );
 }
 
 // Vista del equipo: vacaciones si hay una persona, solape si hay dos o más.
-function tipoDeDiaEquipo(fecha) {
-  const cantidad = quienesEstanDeVacaciones(fecha).length;
-  if (cantidad >= 2) return "solape";
-  if (cantidad === 1) return "vacaciones";
-  if (esFestivo(fechaATexto(fecha))) return "festivo";
+function tipoDeDiaEquipo(personas, texto) {
+  if (personas.length >= 2) return "solape";
+  if (personas.length === 1) return "vacaciones";
+  if (esFestivo(texto)) return "festivo";
   return "laborable";
 }
 
 // Vista de una persona: qué tipo de día es, para elegir el color en el calendario.
-function tipoDeDia(fecha) {
+function tipoDeDia(fecha, empleado = empleadoActual()) {
   const texto = fechaATexto(fecha);
-  if (!estaDentroDelContrato(texto)) return "fuera";
+  if (!estaDentroDelContrato(texto, empleado)) return "fuera";
 
-  const enVacaciones = empleadoActual().periodos.some((periodo) => texto >= periodo.desde && texto <= periodo.hasta);
-  if (enVacaciones && cuentaComoVacaciones(fecha)) return "vacaciones";
+  const enVacaciones = empleado.periodos.some((periodo) => texto >= periodo.desde && texto <= periodo.hasta);
+  if (enVacaciones && cuentaComoVacaciones(fecha, empleado)) return "vacaciones";
   if (esFestivo(texto)) return "festivo";
-  if (!trabajaEseDia(fecha)) return "no-laborable";
+  if (!trabajaEseDia(fecha, empleado)) return "no-laborable";
   return "laborable";
+}
+
+// Con colores por persona, un día con varias personas se parte en franjas, una por color.
+function pintarConColores(celda, personas) {
+  const colores = personas.map(colorDePersona);
+  const ancho = 100 / colores.length;
+  const franjas = colores.map((color, i) => `${color} ${i * ancho}% ${(i + 1) * ancho}%`);
+  celda.style.background = `linear-gradient(135deg, ${franjas.join(", ")})`;
+  celda.style.color = "#ffffff";
+  if (personas.length >= 2) celda.classList.add("dia-con-solape");
+}
+
+// ---------- Controles arriba del calendario ----------
+
+function mostrarControlesCalendario() {
+  const textos = TEXTOS[idioma];
+  const persona = personaDelCalendario();
+
+  // Desplegable "Ver": todo el equipo o una persona.
+  const menu = document.getElementById("ver-calendario");
+  menu.innerHTML = "";
+  const todos = crearElemento("option", "", textos.todoElEquipo);
+  todos.value = -1;
+  menu.append(todos);
+  datos.empleados.forEach((empleado, posicion) => {
+    const opcion = crearElemento("option", "", empleado.nombre || textos.sinNombre);
+    opcion.value = posicion;
+    menu.append(opcion);
+  });
+  menu.value = persona ? datos.calendarioPersona : -1;
+
+  // Colores y casillas de personas: solo en la vista del equipo.
+  document.getElementById("opciones-equipo").hidden = Boolean(persona);
+  document.querySelector(`[name=coloresCalendario][value=${datos.coloresPorPersona ? "persona" : "uno"}]`).checked = true;
+
+  const lista = document.getElementById("personas-calendario");
+  lista.innerHTML = "";
+  datos.empleados.forEach((empleado) => {
+    const etiqueta = crearElemento("label", "chip-persona");
+    const casilla = document.createElement("input");
+    casilla.type = "checkbox";
+    casilla.checked = !empleado.ocultoEnCalendario;
+    casilla.addEventListener("change", () => {
+      empleado.ocultoEnCalendario = !casilla.checked;
+      guardarDatos();
+      mostrarCalendario();
+    });
+    etiqueta.append(casilla);
+    // Con colores por persona, cada casilla lleva su color y sirve de leyenda.
+    if (datos.coloresPorPersona) {
+      const muestra = crearElemento("i", "muestra");
+      muestra.style.background = colorDePersona(empleado);
+      etiqueta.append(muestra);
+    }
+    etiqueta.append(crearElemento("span", "", empleado.nombre || textos.sinNombre));
+    lista.append(etiqueta);
+  });
+
+  // Leyenda: algunas muestras solo tienen sentido en una de las vistas.
+  document.querySelectorAll(".solo-vista-equipo").forEach((elemento) => (elemento.hidden = Boolean(persona)));
+  document.querySelectorAll(".solo-vista-persona").forEach((elemento) => (elemento.hidden = !persona));
+  document.querySelectorAll(".solo-un-color").forEach((elemento) => {
+    elemento.hidden = Boolean(persona) || datos.coloresPorPersona;
+  });
 }
 
 // Nombre del mes en el idioma actual, con mayúscula: "Enero", "Ene", "January", "Jan".
@@ -55,11 +130,11 @@ function inicialesDeLaSemana() {
 }
 
 // Lista de 12 números: cuántos días de vacaciones se usan cada mes.
-function diasDeVacacionesPorMes() {
+function diasDeVacacionesPorMes(empleado = empleadoActual()) {
   const porMes = new Array(12).fill(0);
-  empleadoActual().periodos.forEach((periodo) => {
+  empleado.periodos.forEach((periodo) => {
     recorrerPeriodo(periodo, (fecha) => {
-      if (cuentaComoVacaciones(fecha)) porMes[fecha.getMonth()]++;
+      if (cuentaComoVacaciones(fecha, empleado)) porMes[fecha.getMonth()]++;
     });
   });
   return porMes;
@@ -101,25 +176,18 @@ function mostrarCalendario() {
   contenedor.innerHTML = "";
   const titulo = document.getElementById("titulo-calendario");
   titulo.textContent = textos.calendario.replace("{anio}", anio || "");
-  const equipo = vistaDeEquipo();
+  const persona = personaDelCalendario();
+  const equipo = !persona;
   // En la hoja impresa el título lleva también el nombre de la persona, o "Todo el equipo".
-  const nombreImpreso = equipo ? textos.todoElEquipo : empleadoActual().nombre;
+  const nombreImpreso = equipo ? textos.todoElEquipo : persona.nombre;
   if (nombreImpreso) {
     titulo.append(crearElemento("span", "solo-impresion", " · " + nombreImpreso));
   }
-
-  // Opciones de vista y leyenda: algunas solo tienen sentido en una de las dos vistas.
-  document.querySelector(`[name=vistaCalendario][value=${equipo ? "equipo" : "persona"}]`).checked = true;
-  document.getElementById("vista-persona").textContent = textos.soloPersona.replace(
-    "{nombre}",
-    empleadoActual().nombre || textos.sinNombre
-  );
-  document.querySelectorAll(".solo-vista-equipo").forEach((elemento) => (elemento.hidden = !equipo));
-  document.querySelectorAll(".solo-vista-persona").forEach((elemento) => (elemento.hidden = equipo));
+  mostrarControlesCalendario();
 
   if (!anio) return; // sin año no hay calendario
 
-  const porMes = diasDeVacacionesPorMes();
+  const porMes = equipo ? [] : diasDeVacacionesPorMes(persona);
   const hoy = fechaATexto(new Date());
   const iniciales = inicialesDeLaSemana();
 
@@ -139,15 +207,17 @@ function mostrarCalendario() {
     const dia = new Date(anio, mes, 1);
     while (dia.getMonth() === mes) {
       const texto = fechaATexto(dia);
-      const tipo = equipo ? tipoDeDiaEquipo(dia) : tipoDeDia(dia);
+      const personas = equipo ? quienesEstanDeVacaciones(dia) : [];
+      const tipo = equipo ? tipoDeDiaEquipo(personas, texto) : tipoDeDia(dia, persona);
       const celda = crearElemento("span", "dia dia-" + tipo, dia.getDate());
       if (texto === hoy) celda.classList.add("dia-hoy");
+      if (equipo && datos.coloresPorPersona && personas.length) pintarConColores(celda, personas);
 
       // Al pasar el mouse se ve el nombre del festivo y, en la vista del equipo, quiénes están de vacaciones.
       const festivo = datos.festivos.find((f) => f.fecha === texto);
       const nombres = [];
       if (festivo && festivo.nombre) nombres.push(festivo.nombre);
-      if (equipo) nombres.push(...quienesEstanDeVacaciones(dia));
+      personas.forEach((empleado) => nombres.push(empleado.nombre || textos.sinNombre));
       if (nombres.length) celda.title = nombres.join(", ");
 
       grilla.append(celda);
@@ -178,9 +248,15 @@ window.addEventListener("afterprint", () => {
 
 document.getElementById("boton-imprimir").addEventListener("click", () => window.print());
 
-document.querySelectorAll("[name=vistaCalendario]").forEach((opcion) => {
+document.getElementById("ver-calendario").addEventListener("change", (evento) => {
+  datos.calendarioPersona = Number(evento.target.value);
+  guardarDatos();
+  mostrarCalendario();
+});
+
+document.querySelectorAll("[name=coloresCalendario]").forEach((opcion) => {
   opcion.addEventListener("change", () => {
-    datos.vistaCalendario = opcion.value;
+    datos.coloresPorPersona = opcion.value === "persona";
     guardarDatos();
     mostrarCalendario();
   });
