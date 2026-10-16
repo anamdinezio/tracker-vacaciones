@@ -691,10 +691,18 @@ a.boton-chico {
 }
 
 /* Calendario anual: los meses se acomodan solos según el ancho. */
+/* Tres meses por fila: cada fila es un trimestre. */
 .calendario {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  grid-template-columns: repeat(3, 1fr);
   gap: 20px;
+}
+
+/* En el celular no entran tres: un mes debajo del otro. */
+@media (max-width: 640px) {
+  .calendario {
+    grid-template-columns: 1fr;
+  }
 }
 
 .mes-titulo {
