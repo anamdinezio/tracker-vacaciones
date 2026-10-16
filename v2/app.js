@@ -113,6 +113,7 @@ function datosVacios() {
     calendarioPersona: -1, // -1: el calendario muestra todo el equipo
     coloresPorPersona: false,
     avisarSolapes: true,
+    correo: "gmail", // dónde se abre el mail: gmail, outlook, outlook365 o programa
     mailAsunto: "", // vacío: se usa el texto original del idioma actual
     mailTexto: "",
   };

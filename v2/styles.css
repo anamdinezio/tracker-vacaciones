@@ -655,6 +655,21 @@ a.boton-chico {
   cursor: pointer;
 }
 
+/* Desplegable de correo: Gmail, Outlook, etc. */
+.campo-correo {
+  max-width: 360px;
+}
+
+.campo-correo select {
+  height: 40px;
+  padding: 8px 10px;
+  border: 1px solid var(--borde);
+  border-radius: 6px;
+  background: var(--campo-fondo);
+  font: inherit;
+  color: var(--texto);
+}
+
 /* Con colores por persona, un día con dos o más personas lleva borde rojo. */
 .dia-con-solape {
   box-shadow: inset 0 0 0 2px var(--solape-fondo);

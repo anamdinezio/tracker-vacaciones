@@ -68,12 +68,25 @@ function completarMail(texto, empleado, periodo, dias) {
     .replaceAll("{solapeHasta}", formatearFecha(dias.hasta));
 }
 
-// Un link "mailto:" abre el programa de correo con el destinatario, el asunto y el texto ya cargados.
+// Dirección para abrir un mail nuevo en cada correo, con destinatario, asunto y texto ya cargados.
 // No se manda nada solo: el usuario lo revisa y lo envía desde su correo.
+// "programa" usa un link mailto:, que abre el programa de correo predeterminado de la computadora.
+const DIRECCIONES_CORREO = {
+  gmail: (para, asunto, cuerpo) =>
+    `https://mail.google.com/mail/?view=cm&fs=1&to=${para}&su=${asunto}&body=${cuerpo}`,
+  outlook: (para, asunto, cuerpo) =>
+    `https://outlook.live.com/mail/0/deeplink/compose?to=${para}&subject=${asunto}&body=${cuerpo}`,
+  outlook365: (para, asunto, cuerpo) =>
+    `https://outlook.office.com/mail/deeplink/compose?to=${para}&subject=${asunto}&body=${cuerpo}`,
+  programa: (para, asunto, cuerpo) => `mailto:${para}?subject=${asunto}&body=${cuerpo}`,
+};
+
 function linkDelMail(empleado, periodo, dias) {
+  const para = encodeURIComponent(empleado.mail);
   const asunto = encodeURIComponent(completarMail(asuntoDelMail(), empleado, periodo, dias));
   const cuerpo = encodeURIComponent(completarMail(textoDelMail(), empleado, periodo, dias));
-  return "mailto:" + encodeURIComponent(empleado.mail) + "?subject=" + asunto + "&body=" + cuerpo;
+  const armar = DIRECCIONES_CORREO[datos.correo] ?? DIRECCIONES_CORREO.gmail;
+  return armar(para, asunto, cuerpo);
 }
 
 // Botón para avisarle a una de las dos personas. Si no tiene mail, queda la explicación.
@@ -85,6 +98,11 @@ function crearBotonAvisar(empleado, periodo, dias) {
   }
   const enlace = crearElemento("a", "boton-chico boton-editar", textos.avisarA.replace("{nombre}", nombre));
   enlace.href = linkDelMail(empleado, periodo, dias);
+  // Gmail y Outlook se abren en una pestaña nueva, para no salir de esta página.
+  if (datos.correo !== "programa") {
+    enlace.target = "_blank";
+    enlace.rel = "noopener";
+  }
   return enlace;
 }
 
@@ -93,6 +111,7 @@ function crearBotonAvisar(empleado, periodo, dias) {
 const casillaAvisar = document.getElementById("avisar-solapes");
 const campoAsunto = document.getElementById("mail-asunto");
 const campoTexto = document.getElementById("mail-texto");
+const menuCorreo = document.getElementById("mail-correo");
 
 function mostrarSolapes() {
   const textos = TEXTOS[idioma];
@@ -103,6 +122,7 @@ function mostrarSolapes() {
   // Los campos del mail se rellenan solo si el usuario no está escribiendo en ellos.
   if (document.activeElement !== campoAsunto) campoAsunto.value = asuntoDelMail();
   if (document.activeElement !== campoTexto) campoTexto.value = textoDelMail();
+  menuCorreo.value = datos.correo;
   document.getElementById("boton-texto-original").hidden = !datos.mailAsunto && !datos.mailTexto;
 
   const solapes = avisar ? buscarSolapes() : [];
@@ -140,6 +160,12 @@ casillaAvisar.addEventListener("change", () => {
   datos.avisarSolapes = casillaAvisar.checked;
   guardarDatos();
   actualizarPantalla();
+});
+
+menuCorreo.addEventListener("change", () => {
+  datos.correo = menuCorreo.value;
+  guardarDatos();
+  mostrarSolapes();
 });
 
 campoAsunto.addEventListener("input", () => {
