@@ -58,6 +58,18 @@
         </div>
       </details>
 
+      <details class="tarjeta plegable" id="seccion-pedidos" open>
+        <summary><h2><span data-i18n="pedidos"></span></h2></summary>
+        <p class="descripcion" data-i18n="notaPedidos"></p>
+        <div class="acciones">
+          <button type="button" class="boton-secundario" id="boton-cargar-pedidos" data-i18n="cargarPedidos"></button>
+          <button type="button" class="boton-enlace" id="boton-plantilla-pedidos" data-i18n="descargarPlantillaPedidos"></button>
+          <input type="file" id="archivo-pedidos" accept=".csv,.xlsx,.xls" multiple hidden>
+        </div>
+        <p class="aclaracion" data-i18n="notaPlantillaPedidos"></p>
+        <div id="resultado-pedidos"></div>
+      </details>
+
       <details class="tarjeta plegable" id="seccion-festivos" open>
         <summary><h2><span data-i18n="festivosEquipo"></span></h2></summary>
 
@@ -310,6 +322,7 @@
   <script src="importar.js?v=1"></script>
   <script src="respaldo.js?v=1"></script>
   <script src="solapes.js?v=1"></script>
+  <script src="pedidos.js?v=1"></script>
   <script src="pestanias.js?v=1"></script>
   <script src="app.js?v=1"></script>
 </body>

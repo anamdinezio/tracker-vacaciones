@@ -423,6 +423,13 @@ form > .aclaracion:last-child {
   border-top: 1px solid var(--borde);
 }
 
+/* Resultado de cargar pedidos: una línea por persona. */
+.lista-pedidos {
+  margin: 0 0 8px;
+  padding-left: 20px;
+  font-size: 0.9rem;
+}
+
 /* Lista del equipo: nombre y mail en columnas a la izquierda, días disponibles a la derecha. */
 .equipo-nombre {
   flex: 0 0 180px;
