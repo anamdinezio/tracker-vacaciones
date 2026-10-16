@@ -215,6 +215,75 @@ main {
   outline-offset: -1px;
 }
 
+/* ---------- Pestañas ---------- */
+
+.pestanias {
+  display: flex;
+  overflow-x: auto; /* en pantallas chicas se desliza de costado */
+  scrollbar-width: none;
+  gap: 4px;
+  margin: 20px 0 16px;
+  border-bottom: 1px solid var(--borde);
+}
+
+.pestania {
+  flex-shrink: 0;
+  padding: 10px 14px;
+  border: none;
+  border-bottom: 3px solid transparent;
+  margin-bottom: -1px; /* la línea de la pestaña activa tapa la del borde */
+  background: transparent;
+  color: var(--texto-suave);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.pestania:hover {
+  color: var(--texto);
+}
+
+.pestania.activa {
+  border-bottom-color: var(--acento);
+  color: var(--acento);
+}
+
+/* Si hay solapes, la pestaña se pinta del color del aviso. */
+.pestania.con-aviso {
+  color: var(--solape-fondo);
+}
+
+.pestania.activa.con-aviso {
+  border-bottom-color: var(--solape-fondo);
+}
+
+.panel[hidden] {
+  display: none;
+}
+
+/* Menú para elegir la persona, con el botón de agregar al lado. */
+.elegir-persona {
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.elegir-persona .campo {
+  flex: 1;
+  max-width: 320px;
+}
+
+.elegir-persona select {
+  height: 40px;
+  padding: 8px 10px;
+  border: 1px solid var(--borde);
+  border-radius: 6px;
+  background: var(--campo-fondo);
+  font: inherit;
+  color: var(--texto);
+}
+
 /* El año es un número corto: no hace falta todo el ancho. */
 .campo-anio {
   max-width: 160px;
@@ -388,9 +457,14 @@ form > .aclaracion:last-child {
   display: none;
 }
 
-/* En los solapes, la descripción ocupa el espacio y los botones van a la derecha. */
+/* En los solapes, la descripción ocupa el espacio y los botones van a la derecha.
+   Si no entran en una línea (celular), los botones bajan. */
+.lista-solapes li {
+  flex-wrap: wrap;
+}
+
 .lista-solapes li > span:first-child {
-  margin-right: auto;
+  flex: 1 1 260px;
 }
 
 a.boton-chico {
@@ -744,7 +818,7 @@ a.boton-chico {
 
   /* Se oculta todo menos el calendario y el pie. */
   .encabezado,
-  main > *:not(#seccion-calendario),
+  main > *:not([data-panel="calendario"]),
   .no-imprimir,
   .plegable summary::after {
     display: none !important;
@@ -753,6 +827,11 @@ a.boton-chico {
   main {
     max-width: none;
     padding: 0;
+  }
+
+  /* Aunque se esté viendo otra pestaña, se imprime el calendario. */
+  .panel[data-panel="calendario"] {
+    display: block !important;
   }
 
   .solo-impresion {

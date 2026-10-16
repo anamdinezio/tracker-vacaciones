@@ -106,9 +106,12 @@ function mostrarSolapes() {
   document.getElementById("boton-texto-original").hidden = !datos.mailAsunto && !datos.mailTexto;
 
   const solapes = avisar ? buscarSolapes() : [];
-  document.getElementById("titulo-solapes").textContent = solapes.length
-    ? textos.solapesCantidad.replace("{n}", solapes.length)
-    : textos.solapes;
+  // El título y la pestaña muestran cuántos solapes hay.
+  const titulo = solapes.length ? textos.solapesCantidad.replace("{n}", solapes.length) : textos.solapes;
+  document.getElementById("titulo-solapes").textContent = titulo;
+  const pestania = document.getElementById("pestania-solapes");
+  pestania.textContent = titulo;
+  pestania.classList.toggle("con-aviso", solapes.length > 0);
 
   const lista = document.getElementById("lista-solapes");
   lista.innerHTML = "";

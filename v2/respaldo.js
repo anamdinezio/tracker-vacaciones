@@ -121,10 +121,9 @@ function borrarTodo() {
   resultadoRespaldo = { clave: "datosBorrados" };
   mostrarResultadoRespaldo();
 
-  // Volver al paso 1, abierto.
-  const seccionEmpleado = document.getElementById("seccion-equipo");
-  seccionEmpleado.open = true;
-  seccionEmpleado.scrollIntoView({ behavior: "smooth" });
+  // Volver a la pestaña "Equipo".
+  mostrarPestania("equipo");
+  document.getElementById("seccion-equipo").open = true;
 }
 
 // ---------- Botones ----------

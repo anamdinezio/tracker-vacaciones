@@ -32,226 +32,253 @@
     <p class="intro" data-i18n="intro"></p>
     <p class="aclaracion" data-i18n="notaPrivacidad"></p>
 
+    <!-- Pestañas: cada botón muestra el panel con el mismo nombre. -->
+    <nav class="pestanias no-imprimir">
+      <button type="button" class="pestania" data-pestania="equipo" data-i18n="pestaniaEquipo"></button>
+      <button type="button" class="pestania" data-pestania="persona" data-i18n="pestaniaPersona"></button>
+      <button type="button" class="pestania" data-pestania="calendario" data-i18n="pestaniaCalendario"></button>
+      <button type="button" class="pestania" data-pestania="solapes" id="pestania-solapes"></button>
+      <button type="button" class="pestania" data-pestania="respaldo" data-i18n="respaldo"></button>
+    </nav>
+
     <!-- <details> se abre y se cierra solo al tocar el título. -->
-    <details class="tarjeta plegable" id="seccion-equipo" open>
-      <summary><h2><span class="paso">1</span><span data-i18n="equipo"></span></h2></summary>
+    <div class="panel" data-panel="equipo">
+      <details class="tarjeta plegable" id="seccion-equipo" open>
+        <summary><h2><span data-i18n="equipo"></span></h2></summary>
 
-      <label class="campo campo-anio">
-        <span data-i18n="anio"></span>
-        <input type="number" id="campo-anio" min="2000" max="2100">
-      </label>
-      <p class="aclaracion" data-i18n="notaEquipo"></p>
-
-      <ul id="lista-equipo" class="lista"></ul>
-      <div class="acciones">
-        <button type="button" class="boton-secundario" id="boton-agregar-empleado" data-i18n="agregarEmpleado"></button>
-      </div>
-    </details>
-
-    <details class="tarjeta plegable" id="seccion-festivos" open>
-      <summary><h2><span class="paso">2</span><span data-i18n="festivosEquipo"></span></h2></summary>
-
-      <form id="form-festivo" class="fila fila-agregar">
-        <label class="campo">
-          <span data-i18n="fecha"></span>
-          <input type="date" name="fecha">
+        <label class="campo campo-anio">
+          <span data-i18n="anio"></span>
+          <input type="number" id="campo-anio" min="2000" max="2100">
         </label>
-        <label class="campo">
-          <span data-i18n="nombreFestivo"></span>
-          <input type="text" name="nombre">
-        </label>
-        <button type="submit" class="boton-principal"></button>
-        <button type="button" class="boton-secundario boton-cancelar" data-i18n="cancelar" hidden></button>
-      </form>
-      <p id="error-festivo" class="error"></p>
-      <p class="aclaracion" data-i18n="notaFestivos"></p>
+        <p class="aclaracion" data-i18n="notaEquipo"></p>
 
-      <div class="acciones">
-        <button type="button" class="boton-secundario" id="boton-importar" data-i18n="importarFestivos"></button>
-        <button type="button" class="boton-enlace" id="boton-plantilla" data-i18n="descargarPlantilla"></button>
-        <input type="file" id="archivo-festivos" accept=".csv,.xlsx,.xls" hidden>
-      </div>
-      <p class="aclaracion" data-i18n="notaImportar"></p>
-      <div id="resultado-importacion"></div>
+        <ul id="lista-equipo" class="lista"></ul>
+        <div class="acciones">
+          <button type="button" class="boton-secundario" id="boton-agregar-empleado" data-i18n="agregarEmpleado"></button>
+        </div>
+      </details>
 
-      <ul id="lista-festivos" class="lista"></ul>
-    </details>
+      <details class="tarjeta plegable" id="seccion-festivos" open>
+        <summary><h2><span data-i18n="festivosEquipo"></span></h2></summary>
 
-    <details class="tarjeta plegable" id="seccion-empleado" open>
-      <summary><h2><span class="paso">3</span><span id="titulo-datos-empleado"></span></h2></summary>
-
-      <form id="form-empleado">
-        <div class="fila">
+        <form id="form-festivo" class="fila fila-agregar">
           <label class="campo">
-            <span data-i18n="nombre"></span>
+            <span data-i18n="fecha"></span>
+            <input type="date" name="fecha">
+          </label>
+          <label class="campo">
+            <span data-i18n="nombreFestivo"></span>
             <input type="text" name="nombre">
           </label>
-          <label class="campo">
-            <span data-i18n="mail"></span>
-            <input type="email" name="mail">
-          </label>
-        </div>
+          <button type="submit" class="boton-principal"></button>
+          <button type="button" class="boton-secundario boton-cancelar" data-i18n="cancelar" hidden></button>
+        </form>
+        <p id="error-festivo" class="error"></p>
+        <p class="aclaracion" data-i18n="notaFestivos"></p>
 
-        <div class="fila">
-          <label class="campo">
-            <span data-i18n="inicioContrato"></span>
-            <input type="date" name="inicioContrato">
-          </label>
-          <label class="campo">
-            <span data-i18n="finContrato"></span>
-            <input type="date" name="finContrato">
-          </label>
+        <div class="acciones">
+          <button type="button" class="boton-secundario" id="boton-importar" data-i18n="importarFestivos"></button>
+          <button type="button" class="boton-enlace" id="boton-plantilla" data-i18n="descargarPlantilla"></button>
+          <input type="file" id="archivo-festivos" accept=".csv,.xlsx,.xls" hidden>
         </div>
-        <p class="aclaracion" data-i18n="notaContrato"></p>
+        <p class="aclaracion" data-i18n="notaImportar"></p>
+        <div id="resultado-importacion"></div>
 
-        <div class="fila">
-          <label class="campo">
-            <span data-i18n="diasVacaciones"></span>
-            <input type="number" name="diasVacaciones" min="0">
-          </label>
-          <label class="campo">
-            <span data-i18n="diasArrastrados"></span>
-            <input type="number" name="diasArrastrados" min="0">
-          </label>
-        </div>
-        <p class="aclaracion" id="nota-proporcional"></p>
+        <ul id="lista-festivos" class="lista"></ul>
+      </details>
+    </div>
 
-        <!-- Los valores van del 0 (domingo) al 6 (sábado), como cuenta JavaScript. -->
-        <fieldset>
-          <legend data-i18n="diasQueTrabaja"></legend>
-          <div class="opciones">
-            <label><input type="checkbox" name="diasLaborables" value="1"> <span data-i18n="lunes"></span></label>
-            <label><input type="checkbox" name="diasLaborables" value="2"> <span data-i18n="martes"></span></label>
-            <label><input type="checkbox" name="diasLaborables" value="3"> <span data-i18n="miercoles"></span></label>
-            <label><input type="checkbox" name="diasLaborables" value="4"> <span data-i18n="jueves"></span></label>
-            <label><input type="checkbox" name="diasLaborables" value="5"> <span data-i18n="viernes"></span></label>
-            <label><input type="checkbox" name="diasLaborables" value="6"> <span data-i18n="sabado"></span></label>
-            <label><input type="checkbox" name="diasLaborables" value="0"> <span data-i18n="domingo"></span></label>
+    <div class="panel" data-panel="persona">
+      <div class="elegir-persona">
+        <label class="campo">
+          <span data-i18n="persona"></span>
+          <select id="elegir-persona"></select>
+        </label>
+        <button type="button" class="boton-secundario" id="boton-agregar-persona-2" data-i18n="agregarEmpleado"></button>
+      </div>
+
+      <details class="tarjeta plegable" id="seccion-empleado" open>
+        <summary><h2><span data-i18n="datosEmpleado"></span></h2></summary>
+
+        <form id="form-empleado">
+          <div class="fila">
+            <label class="campo">
+              <span data-i18n="nombre"></span>
+              <input type="text" name="nombre">
+            </label>
+            <label class="campo">
+              <span data-i18n="mail"></span>
+              <input type="email" name="mail">
+            </label>
           </div>
-        </fieldset>
 
-        <fieldset>
-          <legend data-i18n="formaDeContar"></legend>
-          <div class="opciones">
-            <label><input type="radio" name="formaDeContar" value="laborables"> <span data-i18n="soloLaborables"></span></label>
-            <label><input type="radio" name="formaDeContar" value="naturales"> <span data-i18n="diasNaturales"></span></label>
+          <div class="fila">
+            <label class="campo">
+              <span data-i18n="inicioContrato"></span>
+              <input type="date" name="inicioContrato">
+            </label>
+            <label class="campo">
+              <span data-i18n="finContrato"></span>
+              <input type="date" name="finContrato">
+            </label>
           </div>
-        </fieldset>
+          <p class="aclaracion" data-i18n="notaContrato"></p>
 
-        <p id="mensaje-error" class="error"></p>
-      </form>
-    </details>
+          <div class="fila">
+            <label class="campo">
+              <span data-i18n="diasVacaciones"></span>
+              <input type="number" name="diasVacaciones" min="0">
+            </label>
+            <label class="campo">
+              <span data-i18n="diasArrastrados"></span>
+              <input type="number" name="diasArrastrados" min="0">
+            </label>
+          </div>
+          <p class="aclaracion" id="nota-proporcional"></p>
 
-    <details class="tarjeta plegable" id="seccion-periodos" open>
-      <summary><h2><span class="paso">4</span><span id="titulo-periodos"></span></h2></summary>
+          <!-- Los valores van del 0 (domingo) al 6 (sábado), como cuenta JavaScript. -->
+          <fieldset>
+            <legend data-i18n="diasQueTrabaja"></legend>
+            <div class="opciones">
+              <label><input type="checkbox" name="diasLaborables" value="1"> <span data-i18n="lunes"></span></label>
+              <label><input type="checkbox" name="diasLaborables" value="2"> <span data-i18n="martes"></span></label>
+              <label><input type="checkbox" name="diasLaborables" value="3"> <span data-i18n="miercoles"></span></label>
+              <label><input type="checkbox" name="diasLaborables" value="4"> <span data-i18n="jueves"></span></label>
+              <label><input type="checkbox" name="diasLaborables" value="5"> <span data-i18n="viernes"></span></label>
+              <label><input type="checkbox" name="diasLaborables" value="6"> <span data-i18n="sabado"></span></label>
+              <label><input type="checkbox" name="diasLaborables" value="0"> <span data-i18n="domingo"></span></label>
+            </div>
+          </fieldset>
 
-      <form id="form-periodo" class="fila fila-agregar">
-        <label class="campo">
-          <span data-i18n="desde"></span>
-          <input type="date" name="desde">
-        </label>
-        <label class="campo">
-          <span data-i18n="hasta"></span>
-          <input type="date" name="hasta">
-        </label>
-        <button type="submit" class="boton-principal"></button>
-        <button type="button" class="boton-secundario boton-cancelar" data-i18n="cancelar" hidden></button>
-      </form>
-      <p id="error-periodo" class="error"></p>
-      <p class="aclaracion" id="saldo-periodos"></p>
+          <fieldset>
+            <legend data-i18n="formaDeContar"></legend>
+            <div class="opciones">
+              <label><input type="radio" name="formaDeContar" value="laborables"> <span data-i18n="soloLaborables"></span></label>
+              <label><input type="radio" name="formaDeContar" value="naturales"> <span data-i18n="diasNaturales"></span></label>
+            </div>
+          </fieldset>
 
-      <ul id="lista-periodos" class="lista"></ul>
-    </details>
+          <p id="mensaje-error" class="error"></p>
+        </form>
+      </details>
 
-    <section class="tarjeta">
-      <div class="encabezado-tarjeta">
-        <h2><span class="paso">5</span><span id="titulo-resumen"></span></h2>
-        <p class="aclaracion" id="estado-guardado"></p>
-      </div>
-      <div class="indicadores">
-        <div class="indicador">
-          <span class="indicador-numero" id="total-dias"></span>
-          <span data-i18n="totalDias"></span>
-          <span class="indicador-detalle" id="detalle-arrastrados"></span>
+      <details class="tarjeta plegable" id="seccion-periodos" open>
+        <summary><h2><span data-i18n="periodosVacaciones"></span></h2></summary>
+
+        <form id="form-periodo" class="fila fila-agregar">
+          <label class="campo">
+            <span data-i18n="desde"></span>
+            <input type="date" name="desde">
+          </label>
+          <label class="campo">
+            <span data-i18n="hasta"></span>
+            <input type="date" name="hasta">
+          </label>
+          <button type="submit" class="boton-principal"></button>
+          <button type="button" class="boton-secundario boton-cancelar" data-i18n="cancelar" hidden></button>
+        </form>
+        <p id="error-periodo" class="error"></p>
+        <p class="aclaracion" id="saldo-periodos"></p>
+
+        <ul id="lista-periodos" class="lista"></ul>
+      </details>
+
+      <section class="tarjeta">
+        <div class="encabezado-tarjeta">
+          <h2><span data-i18n="resumen"></span></h2>
+          <p class="aclaracion" id="estado-guardado"></p>
         </div>
-        <div class="indicador">
-          <span class="indicador-numero" id="dias-usados"></span>
-          <span data-i18n="diasUsados"></span>
+        <div class="indicadores">
+          <div class="indicador">
+            <span class="indicador-numero" id="total-dias"></span>
+            <span data-i18n="totalDias"></span>
+            <span class="indicador-detalle" id="detalle-arrastrados"></span>
+          </div>
+          <div class="indicador">
+            <span class="indicador-numero" id="dias-usados"></span>
+            <span data-i18n="diasUsados"></span>
+          </div>
+          <div class="indicador indicador-destacado" id="indicador-disponibles">
+            <span class="indicador-numero" id="dias-disponibles"></span>
+            <span data-i18n="diasDisponibles"></span>
+          </div>
+          <div class="indicador indicador-festivos">
+            <span class="indicador-numero" id="festivos-laborables"></span>
+            <span data-i18n="festivosLaborables"></span>
+            <span class="indicador-detalle" data-i18n="noSeDescuentan"></span>
+          </div>
         </div>
-        <div class="indicador indicador-destacado" id="indicador-disponibles">
-          <span class="indicador-numero" id="dias-disponibles"></span>
-          <span data-i18n="diasDisponibles"></span>
+        <p class="aclaracion" id="nota-sin-periodos" data-i18n="notaSinPeriodos"></p>
+
+        <div id="bloque-dias-por-mes">
+          <h3 data-i18n="diasPorMes"></h3>
+          <div id="dias-por-mes" class="grafico-meses"></div>
         </div>
-        <div class="indicador indicador-festivos">
-          <span class="indicador-numero" id="festivos-laborables"></span>
-          <span data-i18n="festivosLaborables"></span>
-          <span class="indicador-detalle" data-i18n="noSeDescuentan"></span>
+      </section>
+    </div>
+
+    <div class="panel" data-panel="calendario">
+      <details class="tarjeta plegable" id="seccion-calendario" open>
+        <summary><h2 id="titulo-calendario"></h2></summary>
+        <div class="opciones vista-calendario no-imprimir">
+          <label><input type="radio" name="vistaCalendario" value="equipo"> <span data-i18n="todoElEquipo"></span></label>
+          <label><input type="radio" name="vistaCalendario" value="persona"> <span id="vista-persona"></span></label>
         </div>
-      </div>
-      <p class="aclaracion" id="nota-sin-periodos" data-i18n="notaSinPeriodos"></p>
+        <div class="leyenda">
+          <span><i class="muestra dia-vacaciones"></i> <span data-i18n="leyendaVacaciones"></span></span>
+          <span class="solo-vista-equipo"><i class="muestra dia-solape"></i> <span data-i18n="leyendaSolape"></span></span>
+          <span><i class="muestra dia-festivo"></i> <span data-i18n="leyendaFestivo"></span></span>
+          <span class="solo-vista-persona"><i class="muestra dia-no-laborable"></i> <span data-i18n="leyendaNoLaborable"></span></span>
+          <span class="solo-vista-persona"><i class="muestra dia-fuera"></i> <span data-i18n="leyendaFuera"></span></span>
+          <button type="button" class="boton-enlace no-imprimir" id="boton-imprimir" data-i18n="imprimirCalendario"></button>
+        </div>
+        <div id="calendario" class="calendario"></div>
+      </details>
+    </div>
 
-      <div id="bloque-dias-por-mes">
-        <h3 data-i18n="diasPorMes"></h3>
-        <div id="dias-por-mes" class="grafico-meses"></div>
-      </div>
-    </section>
+    <div class="panel" data-panel="solapes">
+      <details class="tarjeta plegable" id="seccion-solapes" open>
+        <summary><h2><span id="titulo-solapes"></span></h2></summary>
 
-    <details class="tarjeta plegable" id="seccion-solapes" open>
-      <summary><h2><span class="paso">6</span><span id="titulo-solapes"></span></h2></summary>
-
-      <label class="casilla">
-        <input type="checkbox" id="avisar-solapes">
-        <span data-i18n="avisarSolapes"></span>
-      </label>
-
-      <div id="contenido-solapes">
-        <p class="aclaracion" id="nota-sin-solapes" data-i18n="sinSolapes"></p>
-        <ul id="lista-solapes" class="lista lista-solapes"></ul>
-
-        <h3 data-i18n="textoDelMail"></h3>
-        <p class="aclaracion" data-i18n="notaMail"></p>
-        <label class="campo">
-          <span data-i18n="asunto"></span>
-          <input type="text" id="mail-asunto">
+        <label class="casilla">
+          <input type="checkbox" id="avisar-solapes">
+          <span data-i18n="avisarSolapes"></span>
         </label>
-        <label class="campo">
-          <span data-i18n="mensaje"></span>
-          <textarea id="mail-texto" rows="9"></textarea>
-        </label>
-        <p class="aclaracion" data-i18n="notaDatosMail"></p>
-        <button type="button" class="boton-enlace" id="boton-texto-original" data-i18n="textoOriginal"></button>
-      </div>
-    </details>
 
-    <details class="tarjeta plegable" id="seccion-calendario" open>
-      <summary><h2 id="titulo-calendario"></h2></summary>
-      <div class="opciones vista-calendario no-imprimir">
-        <label><input type="radio" name="vistaCalendario" value="equipo"> <span data-i18n="todoElEquipo"></span></label>
-        <label><input type="radio" name="vistaCalendario" value="persona"> <span id="vista-persona"></span></label>
-      </div>
-      <div class="leyenda">
-        <span><i class="muestra dia-vacaciones"></i> <span data-i18n="leyendaVacaciones"></span></span>
-        <span class="solo-vista-equipo"><i class="muestra dia-solape"></i> <span data-i18n="leyendaSolape"></span></span>
-        <span><i class="muestra dia-festivo"></i> <span data-i18n="leyendaFestivo"></span></span>
-        <span class="solo-vista-persona"><i class="muestra dia-no-laborable"></i> <span data-i18n="leyendaNoLaborable"></span></span>
-        <span class="solo-vista-persona"><i class="muestra dia-fuera"></i> <span data-i18n="leyendaFuera"></span></span>
-        <button type="button" class="boton-enlace no-imprimir" id="boton-imprimir" data-i18n="imprimirCalendario"></button>
-      </div>
-      <div id="calendario" class="calendario"></div>
-    </details>
+        <div id="contenido-solapes">
+          <p class="aclaracion" id="nota-sin-solapes" data-i18n="sinSolapes"></p>
+          <ul id="lista-solapes" class="lista lista-solapes"></ul>
 
-    <section class="tarjeta">
-      <h2 data-i18n="respaldo"></h2>
-      <p class="descripcion" data-i18n="notaRespaldo"></p>
-      <p class="aclaracion" data-i18n="notaRespaldoJson"></p>
-      <div class="acciones">
-        <button type="button" class="boton-secundario" id="boton-descargar-respaldo" data-i18n="descargarRespaldo"></button>
-        <button type="button" class="boton-secundario" id="boton-cargar-respaldo" data-i18n="cargarRespaldo"></button>
-        <input type="file" id="archivo-respaldo" accept=".json,application/json" hidden>
-        <button type="button" class="boton-secundario boton-peligro" id="boton-borrar-todo" data-i18n="borrarTodo"></button>
-      </div>
-      <div id="resultado-respaldo"></div>
-    </section>
+          <h3 data-i18n="textoDelMail"></h3>
+          <p class="aclaracion" data-i18n="notaMail"></p>
+          <label class="campo">
+            <span data-i18n="asunto"></span>
+            <input type="text" id="mail-asunto">
+          </label>
+          <label class="campo">
+            <span data-i18n="mensaje"></span>
+            <textarea id="mail-texto" rows="9"></textarea>
+          </label>
+          <p class="aclaracion" data-i18n="notaDatosMail"></p>
+          <button type="button" class="boton-enlace" id="boton-texto-original" data-i18n="textoOriginal"></button>
+        </div>
+      </details>
+    </div>
+
+    <div class="panel" data-panel="respaldo">
+      <section class="tarjeta">
+        <h2 data-i18n="respaldo"></h2>
+        <p class="descripcion" data-i18n="notaRespaldo"></p>
+        <p class="aclaracion" data-i18n="notaRespaldoJson"></p>
+        <div class="acciones">
+          <button type="button" class="boton-secundario" id="boton-descargar-respaldo" data-i18n="descargarRespaldo"></button>
+          <button type="button" class="boton-secundario" id="boton-cargar-respaldo" data-i18n="cargarRespaldo"></button>
+          <input type="file" id="archivo-respaldo" accept=".json,application/json" hidden>
+          <button type="button" class="boton-secundario boton-peligro" id="boton-borrar-todo" data-i18n="borrarTodo"></button>
+        </div>
+        <div id="resultado-respaldo"></div>
+      </section>
+    </div>
   </main>
 
   <footer class="pie">
@@ -264,6 +291,7 @@
   <script src="importar.js?v=1"></script>
   <script src="respaldo.js?v=1"></script>
   <script src="solapes.js?v=1"></script>
+  <script src="pestanias.js?v=1"></script>
   <script src="app.js?v=1"></script>
 </body>
 </html>

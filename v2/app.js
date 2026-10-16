@@ -254,10 +254,15 @@ function agregarEmpleado() {
   elegirEmpleado(datos.empleados.length - 1);
 
   // Abre los datos de la persona nueva para completarlos.
-  const seccion = document.getElementById("seccion-empleado");
-  seccion.open = true;
-  seccion.scrollIntoView({ behavior: "smooth" });
-  formulario.nombre.focus({ preventScroll: true });
+  mostrarPestania("persona");
+  document.getElementById("seccion-empleado").open = true;
+  formulario.nombre.focus();
+}
+
+// Desde la lista del equipo: elegir a la persona y pasar a su pestaña.
+function verEmpleado(posicion) {
+  elegirEmpleado(posicion);
+  mostrarPestania("persona");
 }
 
 function borrarEmpleado(posicion) {
@@ -291,9 +296,7 @@ function mostrarEquipo() {
     );
 
     fila.append(nombre, mail, disponibles);
-    if (posicion !== datos.seleccionado) {
-      fila.append(crearBotonDeFila(textos.ver, "boton-editar", () => elegirEmpleado(posicion)));
-    }
+    fila.append(crearBotonDeFila(textos.ver, "boton-editar", () => verEmpleado(posicion)));
     // Siempre queda al menos una persona.
     if (datos.empleados.length > 1) {
       fila.append(crearBotonDeFila(textos.borrar, "boton-borrar", () => borrarEmpleado(posicion)));
@@ -301,10 +304,15 @@ function mostrarEquipo() {
     lista.append(fila);
   });
 
-  // Los pasos de abajo llevan el nombre de la persona elegida.
-  const nombre = empleadoActual().nombre || textos.sinNombre;
-  document.getElementById("titulo-datos-empleado").textContent = textos.datosDe.replace("{nombre}", nombre);
-  document.getElementById("titulo-periodos").textContent = textos.periodosDe.replace("{nombre}", nombre);
+  // Menú de la pestaña "Persona" para cambiar a quién se ve.
+  const menu = document.getElementById("elegir-persona");
+  menu.innerHTML = "";
+  datos.empleados.forEach((empleado, posicion) => {
+    const opcion = crearElemento("option", "", empleado.nombre || textos.sinNombre);
+    opcion.value = posicion;
+    menu.append(opcion);
+  });
+  menu.value = datos.seleccionado;
 }
 
 // Hora del último guardado. Vacía hasta que el usuario cambia algo.
@@ -384,9 +392,6 @@ function mostrarResumen() {
   const { calculo, totalDias, diasUsados, diasDisponibles } = calcularSaldo(empleado);
   mostrarCalculoProporcional(calculo);
 
-  document.getElementById("titulo-resumen").textContent = empleado.nombre
-    ? textos.resumenDe.replace("{nombre}", empleado.nombre)
-    : textos.resumen;
   document.getElementById("total-dias").textContent = totalDias;
 
   // Entre paréntesis: si es proporcional y si incluye días del año anterior.
@@ -750,6 +755,10 @@ formFestivo.querySelector(".boton-cancelar").addEventListener("click", cancelarE
 document.getElementById("boton-idioma").addEventListener("click", cambiarIdioma);
 document.getElementById("boton-tema").addEventListener("click", cambiarTema);
 document.getElementById("boton-agregar-empleado").addEventListener("click", agregarEmpleado);
+document.getElementById("boton-agregar-persona-2").addEventListener("click", agregarEmpleado);
+document.getElementById("elegir-persona").addEventListener("change", (evento) => {
+  elegirEmpleado(Number(evento.target.value));
+});
 campoAnio.addEventListener("input", alCambiarAnio);
 
 // Las secciones plegables recuerdan si el usuario las abrió o cerró.
