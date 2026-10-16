@@ -196,6 +196,33 @@
       </div>
     </section>
 
+    <details class="tarjeta plegable" id="seccion-solapes" open>
+      <summary><h2><span class="paso">6</span><span id="titulo-solapes"></span></h2></summary>
+
+      <label class="casilla">
+        <input type="checkbox" id="avisar-solapes">
+        <span data-i18n="avisarSolapes"></span>
+      </label>
+
+      <div id="contenido-solapes">
+        <p class="aclaracion" id="nota-sin-solapes" data-i18n="sinSolapes"></p>
+        <ul id="lista-solapes" class="lista lista-solapes"></ul>
+
+        <h3 data-i18n="textoDelMail"></h3>
+        <p class="aclaracion" data-i18n="notaMail"></p>
+        <label class="campo">
+          <span data-i18n="asunto"></span>
+          <input type="text" id="mail-asunto">
+        </label>
+        <label class="campo">
+          <span data-i18n="mensaje"></span>
+          <textarea id="mail-texto" rows="9"></textarea>
+        </label>
+        <p class="aclaracion" data-i18n="notaDatosMail"></p>
+        <button type="button" class="boton-enlace" id="boton-texto-original" data-i18n="textoOriginal"></button>
+      </div>
+    </details>
+
     <details class="tarjeta plegable" id="seccion-calendario" open>
       <summary><h2 id="titulo-calendario"></h2></summary>
       <div class="opciones vista-calendario no-imprimir">
@@ -236,6 +263,7 @@
   <script src="calendario.js?v=1"></script>
   <script src="importar.js?v=1"></script>
   <script src="respaldo.js?v=1"></script>
+  <script src="solapes.js?v=1"></script>
   <script src="app.js?v=1"></script>
 </body>
 </html>

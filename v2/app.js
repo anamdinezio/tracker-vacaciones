@@ -110,6 +110,9 @@ function datosVacios() {
     festivos: [], // lista de { fecha, nombre }
     empleados: [empleadoVacio()],
     seleccionado: 0, // posición de la persona que se está viendo
+    avisarSolapes: true,
+    mailAsunto: "", // vacío: se usa el texto original del idioma actual
+    mailTexto: "",
   };
 }
 
@@ -611,6 +614,11 @@ function mostrarPeriodos() {
     const aviso = document.createElement("span");
     aviso.className = "lista-aviso";
     aviso.textContent = tieneDiasFueraDelContrato(periodo) ? textos.avisoFueraDelContrato : "";
+    // Si se pidió el aviso, también se marca con quién se solapa.
+    const otros = datos.avisarSolapes ? conQuienSeSolapa(periodo) : [];
+    if (otros.length) {
+      aviso.textContent += (aviso.textContent ? " " : "") + textos.seSolapaCon.replace("{nombres}", otros.join(", "));
+    }
 
     fila.append(
       fechas,
@@ -729,6 +737,7 @@ function actualizarPantalla() {
   mostrarCalendario();
   mostrarPeriodos();
   mostrarFestivos();
+  mostrarSolapes();
 }
 
 // ---------- Arranque ----------

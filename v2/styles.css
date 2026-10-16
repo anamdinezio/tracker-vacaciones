@@ -199,6 +199,17 @@ main {
   color: var(--texto);
 }
 
+.campo textarea {
+  padding: 8px 10px;
+  border: 1px solid var(--borde);
+  border-radius: 6px;
+  background: var(--campo-fondo);
+  font: inherit;
+  color: var(--texto);
+  resize: vertical;
+}
+
+.campo textarea:focus,
 .campo input:focus {
   outline: 2px solid var(--acento);
   outline-offset: -1px;
@@ -365,6 +376,27 @@ form > .aclaracion:last-child {
 }
 
 /* La fila que se está editando queda resaltada. */
+/* Casilla con texto al lado (avisar solapes). */
+.casilla {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+#contenido-solapes[hidden] {
+  display: none;
+}
+
+/* En los solapes, la descripción ocupa el espacio y los botones van a la derecha. */
+.lista-solapes li > span:first-child {
+  margin-right: auto;
+}
+
+a.boton-chico {
+  text-decoration: none;
+}
+
 .lista li.fila-editando {
   background: var(--acento-suave);
 }
