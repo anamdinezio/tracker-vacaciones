@@ -291,8 +291,8 @@ function mostrarEquipo() {
     const fila = document.createElement("li");
     fila.classList.toggle("fila-editando", posicion === datos.seleccionado);
 
-    const nombre = crearElemento("span", "", empleado.nombre || textos.sinNombre);
-    const mail = crearElemento("span", "lista-detalle", empleado.mail);
+    const nombre = crearElemento("span", "equipo-nombre", empleado.nombre || textos.sinNombre);
+    const mail = crearElemento("span", "equipo-mail", empleado.mail);
     const disponibles = crearElemento(
       "span",
       "lista-detalle",

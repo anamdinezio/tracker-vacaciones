@@ -423,6 +423,16 @@ form > .aclaracion:last-child {
   border-top: 1px solid var(--borde);
 }
 
+/* Lista del equipo: nombre y mail en columnas a la izquierda, días disponibles a la derecha. */
+.equipo-nombre {
+  flex: 0 0 180px;
+}
+
+.equipo-mail {
+  color: var(--texto-suave);
+  overflow-wrap: anywhere;
+}
+
 .lista-detalle {
   margin: 0 8px 0 auto;
   color: var(--texto-suave);
