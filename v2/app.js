@@ -406,23 +406,27 @@ function mostrarCalculoProporcional(calculo) {
 }
 
 // Total, usados y disponibles de una persona.
+// Los días usados son solo los aprobados. Los pendientes se cuentan aparte; los rechazados, nada.
 function calcularSaldo(empleado) {
   const calculo = calcularDiasDelAnio(empleado);
   const totalDias = calculo.dias + Number(empleado.diasArrastrados);
-  const diasUsados = empleado.periodos.reduce(
-    (suma, periodo) => suma + contarDiasDeVacaciones(periodo, empleado),
-    0
-  );
+  const sumarDias = (estado) =>
+    empleado.periodos
+      .filter((periodo) => estadoDe(periodo) === estado)
+      .reduce((suma, periodo) => suma + contarDiasDeVacaciones(periodo, empleado), 0);
+  const diasUsados = sumarDias("aprobado");
+  const diasPendientes = sumarDias("pendiente");
   // Sin los días por año (por ejemplo, alguien que entró desde un pedido) no se puede calcular el saldo.
   const faltanDias = String(empleado.diasVacaciones ?? "").trim() === "";
-  return { calculo, totalDias, diasUsados, diasDisponibles: totalDias - diasUsados, faltanDias };
+  return { calculo, totalDias, diasUsados, diasPendientes, diasDisponibles: totalDias - diasUsados, faltanDias };
 }
 
 function mostrarResumen() {
   const textos = TEXTOS[idioma];
   const empleado = empleadoActual();
 
-  const { calculo, totalDias, diasUsados, diasDisponibles, faltanDias } = calcularSaldo(empleado);
+  const { calculo, totalDias, diasUsados, diasPendientes, diasDisponibles, faltanDias } = calcularSaldo(empleado);
+  document.getElementById("dias-pendientes").textContent = diasPendientes;
   mostrarCalculoProporcional(calculo);
 
   // Si faltan los días por año, el total y los disponibles se muestran como "—", no como negativo.
@@ -537,6 +541,12 @@ function cuentaComoVacaciones(fecha, empleado = empleadoActual()) {
   return trabajaEseDia(fecha, empleado) && !esFestivo(texto);
 }
 
+// Estado de un período: "pendiente", "aprobado" o "rechazado".
+// Los períodos cargados antes de que existieran los estados cuentan como aprobados.
+function estadoDe(periodo) {
+  return periodo.estado || "aprobado";
+}
+
 // Recorre un período día por día y hace algo con cada fecha.
 function recorrerPeriodo(periodo, hacerConCadaDia) {
   const dia = leerFecha(periodo.desde);
@@ -583,8 +593,10 @@ function validarPeriodo(periodo) {
 
   // Dos períodos se pisan si uno empieza antes de que termine el otro.
   // El que se está editando no cuenta, porque se va a reemplazar.
+  // Los rechazados no cuentan: esas fechas quedan libres.
   const sePisa = empleadoActual().periodos.some(
-    (otro, posicion) => posicion !== periodoEditando && desde <= otro.hasta && hasta >= otro.desde
+    (otro, posicion) =>
+      posicion !== periodoEditando && estadoDe(otro) !== "rechazado" && desde <= otro.hasta && hasta >= otro.desde
   );
   if (sePisa) return "errorPeriodoSolapado";
 
@@ -594,7 +606,9 @@ function validarPeriodo(periodo) {
 function guardarPeriodo(evento) {
   evento.preventDefault(); // que el formulario no recargue la página
 
-  const periodo = { desde: formPeriodo.desde.value, hasta: formPeriodo.hasta.value };
+  // Lo que carga el jefe a mano entra aprobado. Al editar, el período conserva su estado.
+  const estado = periodoEditando >= 0 ? estadoDe(empleadoActual().periodos[periodoEditando]) : "aprobado";
+  const periodo = { desde: formPeriodo.desde.value, hasta: formPeriodo.hasta.value, estado };
   errorPeriodo = validarPeriodo(periodo);
   mostrarErrorPeriodo();
   if (errorPeriodo) return;
@@ -623,6 +637,12 @@ function cancelarEdicionPeriodo() {
   periodoEditando = -1;
   errorPeriodo = "";
   formPeriodo.reset();
+  actualizarPantalla();
+}
+
+function cambiarEstado(posicion, estado) {
+  empleadoActual().periodos[posicion].estado = estado;
+  guardarDatos();
   actualizarPantalla();
 }
 
@@ -664,10 +684,18 @@ function mostrarPeriodos() {
       aviso.textContent += (aviso.textContent ? " " : "") + textos.seSolapaCon.replace("{nombres}", otros.join(", "));
     }
 
+    const estado = estadoDe(periodo);
+    fila.classList.toggle("periodo-rechazado", estado === "rechazado");
+    const etiqueta = crearElemento("span", "etiqueta-estado estado-" + estado, textos["estado_" + estado]);
+
+    fila.append(fechas, etiqueta, aviso, dias);
+    if (estado !== "aprobado") {
+      fila.append(crearBotonDeFila(textos.aprobar, "boton-aprobar", () => cambiarEstado(posicion, "aprobado")));
+    }
+    if (estado !== "rechazado") {
+      fila.append(crearBotonDeFila(textos.rechazar, "boton-editar", () => cambiarEstado(posicion, "rechazado")));
+    }
     fila.append(
-      fechas,
-      aviso,
-      dias,
       crearBotonDeFila(textos.editar, "boton-editar", () => editarPeriodo(posicion)),
       crearBotonDeFila(textos.borrar, "boton-borrar", () => borrarPeriodo(posicion))
     );

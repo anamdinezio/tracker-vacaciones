@@ -22,21 +22,34 @@ function personaDelCalendario() {
   return datos.empleados[datos.calendarioPersona ?? -1] ?? null;
 }
 
-// Personas encendidas que tienen ese día de vacaciones (solo los días que se descuentan).
+// El período (no rechazado) de una persona que incluye ese día, o undefined si no hay.
+function periodoDelDia(empleado, texto) {
+  return empleado.periodos.find(
+    (periodo) => estadoDe(periodo) !== "rechazado" && texto >= periodo.desde && texto <= periodo.hasta
+  );
+}
+
+// ¿Ese día de esa persona está pendiente de aprobar?
+function estaPendiente(empleado, texto) {
+  const periodo = periodoDelDia(empleado, texto);
+  return Boolean(periodo) && estadoDe(periodo) === "pendiente";
+}
+
+// Personas encendidas que tienen ese día de vacaciones, aprobadas o pendientes
+// (solo los días que se descuentan).
 function quienesEstanDeVacaciones(fecha) {
   const texto = fechaATexto(fecha);
   return datos.empleados.filter(
     (empleado) =>
-      !empleado.ocultoEnCalendario &&
-      empleado.periodos.some((periodo) => texto >= periodo.desde && texto <= periodo.hasta) &&
-      cuentaComoVacaciones(fecha, empleado)
+      !empleado.ocultoEnCalendario && periodoDelDia(empleado, texto) && cuentaComoVacaciones(fecha, empleado)
   );
 }
 
 // Vista del equipo: vacaciones si hay una persona, solape si hay dos o más.
+// Si la única persona de ese día está pendiente, el día se ve como pendiente.
 function tipoDeDiaEquipo(personas, texto) {
   if (personas.length >= 2) return "solape";
-  if (personas.length === 1) return "vacaciones";
+  if (personas.length === 1) return estaPendiente(personas[0], texto) ? "pendiente" : "vacaciones";
   if (esFestivo(texto)) return "festivo";
   return "laborable";
 }
@@ -46,16 +59,21 @@ function tipoDeDia(fecha, empleado = empleadoActual()) {
   const texto = fechaATexto(fecha);
   if (!estaDentroDelContrato(texto, empleado)) return "fuera";
 
-  const enVacaciones = empleado.periodos.some((periodo) => texto >= periodo.desde && texto <= periodo.hasta);
-  if (enVacaciones && cuentaComoVacaciones(fecha, empleado)) return "vacaciones";
+  const periodo = periodoDelDia(empleado, texto);
+  if (periodo && cuentaComoVacaciones(fecha, empleado)) {
+    return estadoDe(periodo) === "pendiente" ? "pendiente" : "vacaciones";
+  }
   if (esFestivo(texto)) return "festivo";
   if (!trabajaEseDia(fecha, empleado)) return "no-laborable";
   return "laborable";
 }
 
 // Con colores por persona, un día con varias personas se parte en franjas, una por color.
-function pintarConColores(celda, personas) {
-  const colores = personas.map(colorDePersona);
+function pintarConColores(celda, personas, texto) {
+  // Los pendientes, con un tono más claro todavía ("26" es 15%).
+  const colores = personas.map((empleado) =>
+    estaPendiente(empleado, texto) ? colorDePersona(empleado).slice(0, 7) + "26" : colorDePersona(empleado)
+  );
   const ancho = 100 / colores.length;
   const franjas = colores.map((color, i) => `${color} ${i * ancho}% ${(i + 1) * ancho}%`);
   celda.style.background = `linear-gradient(135deg, ${franjas.join(", ")})`;
@@ -136,7 +154,8 @@ function inicialesDeLaSemana() {
 // Lista de 12 números: cuántos días de vacaciones se usan cada mes.
 function diasDeVacacionesPorMes(empleado = empleadoActual()) {
   const porMes = new Array(12).fill(0);
-  empleado.periodos.forEach((periodo) => {
+  // Solo los aprobados, igual que los días usados.
+  empleado.periodos.filter((periodo) => estadoDe(periodo) === "aprobado").forEach((periodo) => {
     recorrerPeriodo(periodo, (fecha) => {
       if (cuentaComoVacaciones(fecha, empleado)) porMes[fecha.getMonth()]++;
     });
@@ -215,7 +234,7 @@ function mostrarCalendario() {
       const tipo = equipo ? tipoDeDiaEquipo(personas, texto) : tipoDeDia(dia, persona);
       const celda = crearElemento("span", "dia dia-" + tipo, dia.getDate());
       if (texto === hoy) celda.classList.add("dia-hoy");
-      if (equipo && datos.coloresPorPersona && personas.length) pintarConColores(celda, personas);
+      if (equipo && datos.coloresPorPersona && personas.length) pintarConColores(celda, personas, texto);
 
       // Al pasar el mouse se ve el nombre del festivo y, en la vista del equipo, quiénes están de vacaciones.
       const festivo = datos.festivos.find((f) => f.fecha === texto);

@@ -39,7 +39,9 @@ function validarPedido(empleado, periodo) {
   if ((inicioContrato && desde < inicioContrato) || (finContrato && hasta > finContrato)) {
     return "errorPeriodoFueraDelContrato";
   }
-  const sePisa = empleado.periodos.some((otro) => desde <= otro.hasta && hasta >= otro.desde);
+  const sePisa = empleado.periodos.some(
+    (otro) => estadoDe(otro) !== "rechazado" && desde <= otro.hasta && hasta >= otro.desde
+  );
   if (sePisa) return "errorPeriodoSolapado";
   return "";
 }
@@ -174,7 +176,7 @@ async function cargarArchivoDePedidos(archivo, resultado, nuevas) {
       aplicarDiasPorAnio(empleado, diasPorAnio, archivo, resultado);
       conDiasAplicados.add(empleado);
     }
-    const periodo = { desde: desde.fecha, hasta: hasta.fecha };
+    const periodo = { desde: desde.fecha, hasta: hasta.fecha, estado: "pendiente" }; // el jefe lo aprueba después
 
     // Si el mismo período ya estaba cargado (por ejemplo, al subir dos veces el archivo), no es un error.
     if (empleado.periodos.some((otro) => otro.desde === periodo.desde && otro.hasta === periodo.hasta)) {

@@ -20,13 +20,18 @@ function diasCompartidos(empleadoA, periodoA, empleadoB, periodoB) {
   return { desde: compartidos[0], hasta: compartidos[compartidos.length - 1] };
 }
 
+function noRechazado(periodo) {
+  return estadoDe(periodo) !== "rechazado";
+}
+
 // Lista de todos los solapes del equipo. Cada uno compara a dos personas, una sola vez.
 function buscarSolapes() {
   const solapes = [];
   datos.empleados.forEach((empleadoA, a) => {
     datos.empleados.slice(a + 1).forEach((empleadoB) => {
-      empleadoA.periodos.forEach((periodoA) => {
-        empleadoB.periodos.forEach((periodoB) => {
+      // Los rechazados no cuentan: ya se resolvieron.
+      empleadoA.periodos.filter(noRechazado).forEach((periodoA) => {
+        empleadoB.periodos.filter(noRechazado).forEach((periodoB) => {
           const dias = diasCompartidos(empleadoA, periodoA, empleadoB, periodoB);
           if (dias) solapes.push({ empleadoA, periodoA, empleadoB, periodoB, dias });
         });
@@ -41,7 +46,10 @@ function conQuienSeSolapa(periodo) {
   const nombres = [];
   datos.empleados.forEach((otro, posicion) => {
     if (posicion === datos.seleccionado) return;
-    const seSolapa = otro.periodos.some((suyo) => diasCompartidos(empleadoActual(), periodo, otro, suyo));
+    if (!noRechazado(periodo)) return;
+    const seSolapa = otro.periodos
+      .filter(noRechazado)
+      .some((suyo) => diasCompartidos(empleadoActual(), periodo, otro, suyo));
     if (seSolapa) nombres.push(otro.nombre || TEXTOS[idioma].sinNombre);
   });
   return nombres;
@@ -103,6 +111,13 @@ function crearBotonAvisar(empleado, periodo, dias) {
     enlace.target = "_blank";
     enlace.rel = "noopener";
   }
+  // Avisar es rechazar: el período queda rechazado y el solape desaparece de la lista.
+  // Se espera un momento para que el mail se abra antes de volver a dibujar la página.
+  enlace.addEventListener("click", () => {
+    periodo.estado = "rechazado";
+    guardarDatos();
+    setTimeout(actualizarPantalla, 300);
+  });
   return enlace;
 }
 

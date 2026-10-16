@@ -670,6 +670,15 @@ a.boton-chico {
   color: var(--texto-sobre-acento);
 }
 
+/* Pendiente de aprobar: tono claro del color de vacaciones, con borde punteado. */
+.dia-pendiente {
+  background: var(--acento-suave);
+  color: var(--texto);
+  box-shadow: inset 0 0 0 1px var(--acento);
+  outline: 1px dashed var(--acento);
+  outline-offset: -1px;
+}
+
 .dia-solape {
   background: var(--solape-fondo);
   color: var(--solape-texto);
@@ -917,6 +926,41 @@ a.boton-chico {
 
 #lista-equipo li.fila-con-problemas {
   box-shadow: inset 4px 0 0 var(--error);
+}
+
+/* Estado de cada período en la lista. */
+.etiqueta-estado {
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.estado-pendiente {
+  background: var(--alerta-suave);
+  color: var(--alerta);
+}
+
+.estado-aprobado {
+  background: var(--acento-suave);
+  color: var(--acento);
+}
+
+.estado-rechazado {
+  background: var(--no-laborable-fondo);
+  color: var(--texto-suave);
+}
+
+/* Un período rechazado se ve tachado: no cuenta. */
+.periodo-rechazado > span:first-child {
+  color: var(--texto-aclaracion);
+  text-decoration: line-through;
+}
+
+.boton-aprobar {
+  border-color: var(--acento);
+  color: var(--acento);
 }
 
 .etiqueta-problema {
